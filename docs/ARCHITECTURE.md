@@ -1,117 +1,234 @@
-# Architecture — Vibe Radar
+# Architecture — VibeRadar
 
-## 1. Logical architecture
+## 1. System shape
+
+VibeRadar starts as a modular TypeScript application with a separate worker process. Do not split into network microservices until independent scaling, security isolation, or operational ownership clearly requires it.
 
 ```text
 External sources
   GitHub first
       ↓
-Discovery / provider adapters
+Provider adapters / collectors
       ↓
-Normalization
+Normalization + entity resolution
       ↓
 PostgreSQL
-  repositories
+  projects
+  provider identities
   snapshots
   releases
+  signals
+  provenance
       ↓
-Growth Engine
+Intelligence core
+  velocity
+  VIBE SCORE
+  confidence
+  buildability
+  mechanics/trends later
+  opportunities later
       ↓
-VIBE SCORE
+Candidate policy
       ↓
-Candidate Policy
+AI analyzer
+  bounded input
+  structured output
+  untrusted interpretation
       ↓
-AI Analyzer (bounded, untrusted output)
+Editorial queue
       ↓
-Editorial Queue
+Trusted editor approval
       ↓
-Trusted Editor Approval
-      ↓
-ContentModel
+Content model
       ↓
 Publisher adapters
   Telegram first
+  Web canonical record
+  Instagram later
       ↓
-Publication analytics / attribution
+Analytics / calibration
 ```
 
-## 2. Initial module boundaries
+## 2. Baseline technology direction
+
+- Node.js 24+
+- TypeScript
+- Next.js for public/application surfaces
+- PostgreSQL
+- Drizzle ORM
+- Zod
+- Vitest
+- background worker/job runner
+- Telegram Bot API
+- AI-provider abstraction
+- Docker Compose for local infrastructure
+
+Keep additional dependencies stage-justified.
+
+## 3. Initial module boundaries
+
+A concrete scaffold may adapt folder names, but responsibilities should remain explicit.
 
 ```text
 src/
-  app/            composition/root application
-  config/         environment parsing and validated config
-  db/             connection, migrations, repositories
+  app/                 web/application composition
+  config/              validated runtime configuration
+  db/                  connection, schema, migrations, repositories
   modules/
-    discovery/    source-neutral discovery orchestration
-    github/       GitHub read-only adapter and normalization
-    scoring/      growth metrics + VIBE SCORE
-    analysis/     LLM projection, prompts, schema validation
-    editorial/    candidate state and editor decisions
-    content/      normalized ContentModel and render inputs
-    publishing/   source-neutral publication contracts
-    telegram/     editor bot + Telegram publisher adapter
-    analytics/    publication/referral metrics later
-    outscan/      disabled-by-default future integration
-  jobs/           bounded scheduled jobs/orchestration
+    sources/            source-neutral source/provenance contracts
+    github/             GitHub read-only provider adapter
+    discovery/          collection orchestration
+    entities/           normalization/entity resolution/deduplication
+    snapshots/          time-series observation persistence
+    growth/             deltas, acceleration, project age context
+    scoring/            VIBE SCORE/versioning/breakdown
+    confidence/         evidence confidence
+    buildability/       implementation feasibility assessment
+    mechanics/          Product Mechanic Radar (post-MVP automation)
+    opportunities/      Opportunity Engine (post-MVP automation)
+    analysis/           LLM projection/prompts/schema validation
+    editorial/          candidates and trusted decisions
+    content/            normalized content model
+    publishing/         channel-neutral publication contracts
+    telegram/           editor bot + publisher adapter
+    web/                radar/project presentation use cases
+    analytics/          publication/usefulness/calibration metrics
+    outscan/            isolated security-context integration
+  jobs/                 bounded scheduled/background orchestration
 ```
 
-## 3. Dependency direction
-
-Provider adapters depend on domain contracts, not the reverse.
+## 4. Dependency direction
 
 Preferred direction:
 
 ```text
 app/jobs
    ↓
-use cases/services
+application use cases
    ↓
 domain contracts
    ↓
-adapters (db/github/telegram/llm)
+adapters (db/providers/telegram/llm)
 ```
 
-Avoid circular dependencies and shared catch-all `utils` modules.
+Provider-specific types must not leak into core scoring or editorial contracts unless explicitly mapped.
 
-## 4. Runtime shape
+Avoid circular imports and generic catch-all modules.
 
-MVP can run as a single deployable Node.js application with separate process entry points if useful:
+## 5. Runtime processes
 
-- API/editor surface;
-- worker/scheduler.
+Initial deployment may use one codebase with separate entry points/processes:
 
-Do not split into network microservices until independent scaling or isolation is demonstrated.
+### Web/app process
 
-## 5. Database
+Responsible for:
 
-PostgreSQL is the system of record.
+- minimal public `viberadar.ru` pages;
+- internal/editor endpoints when needed;
+- health/readiness;
+- read-oriented presentation.
 
-Use constraints for:
+### Worker process
 
-- GitHub repository identity;
+Responsible for:
+
+- source collection;
+- snapshot refresh;
+- growth/scoring jobs;
+- analysis queue processing;
+- scheduled radar generation;
+- Telegram publication jobs.
+
+Only one logical scheduler may own a scheduled job at a time. If horizontal workers are introduced, use database-backed leases/advisory locks before introducing a dedicated queue platform.
+
+## 6. PostgreSQL as system of record
+
+Use database constraints for at least:
+
+- provider project identity uniqueness;
 - snapshot uniqueness per observation boundary;
-- score version uniqueness where appropriate;
-- publication idempotency.
+- score/version uniqueness where appropriate;
+- candidate dedupe keys;
+- publication idempotency keys.
 
-## 6. Scheduling
+Historical observations should remain append-oriented rather than mutable aggregates.
 
-Start with bounded in-process or single-worker scheduling if production deployment guarantees a single scheduler instance. If horizontal scaling is introduced, add a database-backed lease/advisory-lock mechanism before adding a queue platform.
+## 7. Evidence vs generated analysis
 
-## 7. Public surfaces
+Keep these as distinct persistence concerns:
 
-MVP:
+### Evidence
 
-- no public website required;
+- source metadata
+- source events
+- repository/provider observations
+- snapshots
+- deterministic metrics
+
+### Generated interpretation
+
+- summaries
+- classifications
+- buildability explanation
+- mechanic proposals
+- opportunity hypotheses
+- channel copy
+
+An LLM output must not become evidence merely because it has been persisted.
+
+## 8. Scoring boundaries
+
+The following are separate:
+
+- reach/popularity
+- growth velocity
+- VIBE SCORE
+- confidence
+- buildability
+- trend/mechanic lifecycle
+
+Do not collapse them into one opaque ranking number.
+
+## 9. Public surfaces
+
+Initial:
+
 - private Telegram editor bot;
-- Telegram channel publisher.
+- Telegram channel publisher;
+- minimal `viberadar.ru` canonical radar/project pages.
 
 Later:
 
-- `viberadar.ru` public catalog;
-- `api.viberadar.ru` API;
-- optional `admin.viberadar.ru` editor UI.
+- richer web discovery/catalog;
+- watchlists and alerts;
+- authenticated personalization;
+- Instagram content generation/publishing;
+- public API;
+- MCP/agent intelligence interface;
+- optional team/admin surfaces.
 
-## 8. OUTSCAN boundary
+## 10. OUTSCAN boundary
 
-`modules/outscan` must remain isolated from scoring and candidate selection. It may contribute only to approved content enrichment/CTA/attribution after feature flags are enabled.
+`modules/outscan` remains isolated from:
+
+- VIBE SCORE;
+- Trend Velocity;
+- confidence;
+- candidate selection;
+- editorial ranking.
+
+It may provide security-context enrichment and explicit, approved commercial attribution only after feature gates are enabled.
+
+## 11. Security/trust boundary
+
+All external repository content, metadata text, README excerpts, release notes, community text, and model output are untrusted inputs.
+
+The LLM cannot:
+
+- publish directly;
+- execute discovered code;
+- modify scoring policy;
+- authorize editor actions;
+- bypass deterministic validation.
+
+See `docs/SECURITY.md` and `docs/SOURCES_AND_TRUST.md`.
