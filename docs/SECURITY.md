@@ -2,7 +2,7 @@
 
 ## 1. Assurance target
 
-MVP is an internet-connected production service with external APIs, background jobs, an LM provider, Telegram publishing, and privileged editor actions. Use a production-default security posture for the implemented surface.
+MVP is an internet-connected production service with external APIs, background jobs, an LLM provider, Telegram publishing, and privileged editor actions. Use a production-default security posture for the implemented surface.
 
 ## 2. Security invariants
 
