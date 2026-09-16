@@ -1,97 +1,257 @@
-# Data Model — Vibe Radar
+# Data Model — VibeRadar
 
-This document defines the conceptual model. Stage 01 may adapt column names while preserving semantics.
+This document defines the conceptual model. Implementation may adapt column names while preserving semantics and boundaries.
 
-## Repository
+## Core principles
 
-Canonical GitHub project identity.
+- Raw observations are immutable where practical.
+- Generated analysis is stored separately from source evidence.
+- Popularity/reach, VIBE SCORE, confidence, buildability, and trend stage are distinct concepts.
+- Every derived output must preserve provenance to its inputs.
+- Commercial attribution must never feed scoring/ranking.
+
+## Source
+
+Canonical external source definition.
 
 Suggested fields:
 
-- `id` internal UUID/identity
-- `provider` (`github` initially)
-- `provider_repository_id`
+- `id`
+- `type`
+- `name`
+- `base_url`
+- `trust_tier`
+- `enabled`
+- `created_at`
+- `updated_at`
+
+## SourceEvent
+
+Observation/provenance record for discovery or refresh.
+
+Fields:
+
+- `id`
+- `source_id`
+- `source_query` / watchlist identifier
+- `external_id` when available
+- `source_url`
+- `observed_at`
+- `event_at` when distinct from observation time
+- `raw_payload_ref` when retained
+- `normalized_status`
+- bounded error metadata without secrets
+
+## Project
+
+Source-neutral project/product identity.
+
+Fields:
+
+- `id`
+- `canonical_name`
+- `canonical_url`
+- `project_type`
+- `description`
+- `primary_language`
+- `license_spdx`
+- `topics`
+- `first_seen_at`
+- `last_seen_at`
+- `status`
+
+A project can have multiple provider identities.
+
+## ProjectProviderIdentity
+
+Maps a project to provider-specific identity.
+
+Fields:
+
+- `project_id`
+- `provider`
+- `provider_project_id`
 - `owner`
 - `name`
 - `full_name`
 - `html_url`
 - `default_branch`
-- `description`
-- `primary_language`
-- `license_spdx`
-- `topics`
-- `created_at_provider`
-- `pushed_at_provider`
-- `first_seen_at`
-- `last_seen_at`
-- `status`
+- provider timestamps/metadata
 
-Unique: `(provider, provider_repository_id)`.
+Unique: `(provider, provider_project_id)`.
 
-## RepositorySnapshot
+## ProjectSnapshot
 
-Time-series observation used for growth calculation.
+Time-series observation used for reach and velocity calculations.
 
 Fields:
 
-- `repository_id`
+- `project_id`
+- `provider`
 - `observed_at`
 - `stars`
 - `forks`
 - `open_issues`
-- `watchers` when provider semantics are useful
+- `watchers` when semantics are useful
+- contributor/activity indicators where reliably available
 - `pushed_at_provider`
-- selected activity metadata
 - `source_event_id`
 
-Do not overwrite historical snapshots.
+Historical snapshots must not be overwritten.
 
-## RepositoryRelease
+## Release
 
 Normalized release/tag signal.
 
 Fields:
 
-- `repository_id`
+- `project_id`
 - `provider_release_id`
 - `tag_name`
 - `name`
 - `published_at`
 - `is_prerelease`
 - `is_draft`
-- bounded release summary/provenance
+- bounded summary/provenance
 
-## SourceEvent
+## Signal
 
-Provenance for discovery/refresh.
+A discrete event worthy of intelligence processing.
 
-Fields:
-
-- source/provider
-- source query/topic/watchlist identifier
-- observed timestamp
-- normalized outcome
-- error/status metadata without secrets
-
-## Score
-
-Explainable score record.
+Examples: unusual repository acceleration, major release, new platform capability, repeated mechanic observation.
 
 Fields:
 
-- `repository_id`
+- `id`
+- `signal_type`
+- `project_id` optional
+- `source_event_id`
+- `detected_at`
+- `effective_at`
+- `status`
+- `evidence_count`
+- normalized machine-readable payload
+
+## ScoreSnapshot
+
+Explainable scoring state for a project/signal at a point in time.
+
+Fields:
+
+- `project_id`
+- `signal_id` optional
 - `score_version`
 - `calculated_at`
-- `growth_score`
-- `relevance_score`
-- `freshness_score`
-- `activity_score`
-- `community_score`
-- `documentation_score`
-- `originality_score`
+- component scores
 - `penalty_score`
 - `final_score`
-- machine-readable explanation/breakdown
+- machine-readable breakdown
+
+Reach metrics such as total stars are stored/displayed separately from final score.
+
+## ConfidenceSnapshot
+
+Evidence-confidence state separate from VIBE SCORE.
+
+Fields:
+
+- `subject_type`
+- `subject_id`
+- `confidence_version`
+- `calculated_at`
+- `confidence_score`
+- `confidence_label`
+- evidence inputs/breakdown
+
+## BuildabilityAssessment
+
+Implementation feasibility state.
+
+Fields:
+
+- `subject_type`
+- `subject_id`
+- `assessment_version`
+- `label` (`SOLO_MVP`, `SMALL_TEAM`, `TEAM_REQUIRED`)
+- dimension breakdown
+- AI-assisted feasibility note
+- constraints
+- created timestamp
+
+## ProductMechanic
+
+Repeated behavior/mechanic detected across independent signals.
+
+Fields:
+
+- `id`
+- `canonical_name`
+- `description`
+- `first_observed_at`
+- `last_observed_at`
+- `stage` (`SPARK`, `RISING`, `BREAKOUT`, `ESTABLISHED`)
+- `velocity`
+- `confidence`
+- `status`
+
+## ProductMechanicEvidence
+
+Many-to-many evidence link.
+
+Fields:
+
+- `mechanic_id`
+- `signal_id`
+- `project_id` optional
+- `source_event_id` optional
+- `independence_group`
+- evidence strength
+
+Independent implementations must be distinguishable from forks/copies of one origin.
+
+## Trend
+
+A broader thematic/technology trend, potentially composed of multiple mechanics and signals.
+
+Fields:
+
+- `id`
+- `canonical_name`
+- `description`
+- `stage`
+- `velocity`
+- `confidence`
+- `first_seen_at`
+- `last_seen_at`
+
+## Opportunity
+
+Analytical product/implementation opportunity derived from evidence.
+
+Fields:
+
+- `id`
+- `title`
+- `problem_statement`
+- `target_user`
+- `market_scope` (`RU`, `GLOBAL`, `RU_GLOBAL`)
+- `buildability_assessment_id`
+- `differentiation_hypothesis`
+- `risk_summary`
+- `opportunity_confidence`
+- `created_at`
+- `status`
+
+## OpportunityEvidence
+
+Links an opportunity to the signals/trends/mechanics that justify it.
+
+Fields:
+
+- `opportunity_id`
+- subject type/id
+- rationale
+- evidence weight
 
 ## Candidate
 
@@ -99,8 +259,9 @@ Editorial candidate generated by deterministic policy.
 
 Fields:
 
-- `repository_id`
-- `score_id`
+- `id`
+- subject type/id
+- relevant score/confidence references
 - `reason`
 - `status`
 - `created_at`
@@ -133,7 +294,7 @@ Fields:
 - `status`
 - bounded token/cost metadata
 
-Do not treat analysis as authorization.
+Analysis is interpretation, never authorization.
 
 ## EditorialDecision
 
@@ -147,13 +308,27 @@ Fields:
 - `decided_at`
 - optional note
 
+## ContentPiece
+
+Normalized approved content artifact independent of a delivery channel.
+
+Fields:
+
+- `id`
+- subject/candidate reference
+- `content_type`
+- `content_version`
+- structured blocks
+- source/evidence references
+- created/approved timestamps
+
 ## Publication
 
 Desired publication intent.
 
 Fields:
 
-- `candidate_id`
+- `content_piece_id`
 - `editorial_decision_id`
 - `channel`
 - `content_version`
@@ -174,11 +349,15 @@ Fields:
 - `started_at`
 - `finished_at`
 - provider message/post ID when successful
-- normalized error code/status
+- normalized error/status
 
-Never store provider tokens.
+Provider tokens must never be stored here.
 
-## Future analytics/OUTSCAN attribution
+## Watchlist / UserProfile — later
+
+Future personalization entities may contain declared interests, stack, domains, team shape, and alert criteria. Do not infer sensitive user characteristics.
+
+## Analytics / OUTSCAN attribution — later
 
 Later entities may include:
 
@@ -187,4 +366,4 @@ Later entities may include:
 - click/referral event
 - OUTSCAN campaign reference
 
-These must not feed VIBE SCORE.
+These must never feed VIBE SCORE, Trend Velocity, confidence, or candidate ranking.
