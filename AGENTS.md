@@ -2,15 +2,15 @@
 
 ## 1. Project identity
 
-- Product: **Vibe Radar**
+- Product: **VibeRadar**
 - Canonical domain: `viberadar.ru`
 - Repository working name: `vibe-radar`
 - Primary language for product/editorial copy: Russian
-- Product type: automated media + GitHub trend discovery + project catalog
+- Product type: technology intelligence + opportunity discovery for AI-assisted builders
 
 ## 2. Core objective
 
-Build a deterministic pipeline that discovers noteworthy GitHub/open-source projects, measures their growth, scores editorial relevance, uses AI only for bounded analysis and copy assistance, and publishes only after trusted editorial approval.
+Build a deterministic intelligence pipeline that discovers early technology/open-source signals, measures growth and evidence confidence, evaluates buildability, turns validated signals into source-backed analysis, and publishes only after trusted editorial approval.
 
 The system must remain useful without OUTSCAN. OUTSCAN is a later native integration and must never affect project discovery, VIBE SCORE, or editorial ranking.
 
@@ -123,6 +123,6 @@ Do not inflate documentation with routine implementation notes.
 
 ## 12. Implementation order
 
-Follow `docs/ROADMAP.md` and the current stage prompt. Do not jump to later stages unless the user explicitly changes scope.
+Follow `docs/IMPLEMENTATION_SPEC.md`, `docs/ROADMAP.md`, and the current stage prompt. Do not jump to later stages unless the user explicitly changes scope.
 
 For the initial task, follow `CODEX_STAGE_01.md` and stop after Stage 01 verification.
