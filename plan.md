@@ -21,6 +21,13 @@ Canonical product concept is documented. Runtime implementation has not started.
 - [x] Opportunity Engine contract documented
 - [x] OUTSCAN integration boundary documented
 - [x] Initial Codex implementation path defined
+- [x] Implementation specification documented
+- [x] Database schema contract documented
+- [x] Jobs/scheduling/retry contract documented
+- [x] Strict light minimal web UI contract documented
+- [x] Operations/deployment contract documented
+- [x] Test strategy documented
+- [x] Stage 01 Codex brief aligned with Next.js + worker architecture
 
 ## Stage 01 — Foundation
 
