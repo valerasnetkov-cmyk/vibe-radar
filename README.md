@@ -133,17 +133,23 @@ See `docs/OUTSCAN_INTEGRATION.md`.
 - `plan.md` - current implementation plan
 - `CHANGELOG.md` - durable project changes
 - `docs/PRODUCT.md` - canonical product contract
+- `docs/IMPLEMENTATION_SPEC.md` - executable implementation specification
 - `docs/ARCHITECTURE.md` - module/runtime boundaries
 - `docs/DATA_MODEL.md` - canonical data model
+- `docs/DATABASE_SCHEMA.md` - PostgreSQL table/constraint/index contract
 - `docs/GITHUB_DISCOVERY.md` - GitHub discovery rules
 - `docs/SOURCES_AND_TRUST.md` - evidence tiers and fact-check policy
 - `docs/VIBE_SCORE.md` - score/velocity contract
 - `docs/AI_ANALYSIS.md` - AI trust boundary
 - `docs/CONTENT_MODEL.md` - normalized content model
 - `docs/EDITORIAL_PIPELINE.md` - review/publish lifecycle
+- `docs/JOBS_AND_PIPELINE.md` - background jobs, scheduling and retry rules
 - `docs/PRODUCT_MECHANIC_RADAR.md` - emerging-mechanic detection
 - `docs/OPPORTUNITY_ENGINE.md` - signal-to-product-opportunity contract
 - `docs/MVP_SCOPE.md` - implementation boundary and acceptance criteria
+- `docs/WEB_UI.md` - strict light visual system and web UI rules
+- `docs/TEST_STRATEGY.md` - unit/integration/security/E2E verification contract
+- `docs/OPERATIONS.md` - deployment, observability, backup and rollback rules
 - `docs/SECURITY.md` - security invariants
 - `docs/OUTSCAN_INTEGRATION.md` - OUTSCAN integration rules
 - `docs/ROADMAP.md` - staged delivery
