@@ -1,6 +1,6 @@
 # Codex Task — Stage 01 Foundation
 
-Implement **only Stage 01 Foundation** for Vibe Radar. Do not implement GitHub discovery, VIBE SCORE, LLM integration, Telegram, Instagram, website UI, or OUTSCAN runtime integration.
+Implement **only Stage 01 Foundation** for VibeRadar. Do not implement GitHub discovery, VIBE SCORE, AI analysis, Telegram, Instagram, production editorial UI, Product Mechanic Radar, Opportunity Engine, or OUTSCAN runtime integration.
 
 ## Before editing
 
@@ -9,26 +9,57 @@ Read, in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `plan.md`
-4. `docs/ARCHITECTURE.md`
-5. `docs/DATA_MODEL.md`
-6. `docs/SECURITY.md`
+4. `docs/IMPLEMENTATION_SPEC.md`
+5. `docs/ARCHITECTURE.md`
+6. `docs/DATABASE_SCHEMA.md`
+7. `docs/SECURITY.md`
+8. `docs/TEST_STRATEGY.md`
+9. `docs/WEB_UI.md`
 
-Treat those documents as the current project contract.
+Treat these documents as the current project contract.
 
 ## Goal
 
-Create a minimal, production-oriented Node.js/TypeScript foundation that can safely support later Vibe Radar stages without prematurely implementing them.
+Create a minimal, production-oriented foundation that can support the later VibeRadar pipeline without prematurely implementing it.
 
 ## Required implementation
 
 ### Project/tooling
 
-- Node.js 24+ project
-- TypeScript
+- Node.js 24+
+- TypeScript with strict mode
 - pnpm
-- Fastify application shell
+- Next.js App Router
+- separate worker entry point
+- PostgreSQL
+- Drizzle ORM with explicit migrations
+- Zod
 - Vitest
-- lint/format/typecheck/build scripts using a minimal justified toolset
+- lint/format/typecheck/build scripts with a minimal justified toolset
+
+Do not add a second web framework.
+
+### Application shell
+
+Create only the minimum routes needed to prove the application foundation:
+
+- `/` — restrained placeholder shell using the VibeRadar light visual system; no fake live metrics
+- `GET /api/health/live`
+- `GET /api/health/ready`
+
+The home shell must follow `docs/WEB_UI.md`: light, flat, minimal, no decorative gradients, glows, glassmorphism, or shadow-card wall.
+
+Do not implement the real radar/project UI yet.
+
+### Worker
+
+Create a separate worker process/entry point that can:
+
+- start with validated configuration;
+- establish the future background-process boundary;
+- shut down cleanly.
+
+It must not implement discovery/scoring jobs in Stage 01.
 
 ### Configuration
 
@@ -37,55 +68,54 @@ Create a validated server-side configuration boundary.
 At minimum support:
 
 - `NODE_ENV`
-- `PORT`
-- `DATABASE_URL`
+- database configuration
+- server/runtime settings needed by the chosen Next.js/worker setup
 - `DATABASE_SSL`
 - OUTSCAN feature flags from `.env.example`, parsed but unused
 
-Do not require GitHub/Telegram/LLM credentials in Stage 01 startup because those integrations do not exist yet.
+Do not require GitHub/Telegram/AI credentials because those integrations do not exist yet.
 
-Invalid required configuration must fail closed at startup with a safe error that does not print secret values.
+Invalid required configuration must fail closed with a safe error that does not print secret values.
 
-### PostgreSQL
+### PostgreSQL / Drizzle
 
-- explicit connection boundary;
-- versioned migrations;
-- no automatic hidden schema mutation outside the explicit migration command;
-- parameterized queries/typed bindings;
+Requirements:
+
+- explicit server-only DB connection boundary;
+- Drizzle schema definitions;
+- explicit versioned migrations;
+- no automatic hidden production schema mutation from application startup;
+- typed/parameterized database access;
 - local PostgreSQL through Docker Compose.
 
-Implement the minimum schema needed to establish future domain identity and publication idempotency contracts without overbuilding provider-specific behavior.
+Use `docs/DATABASE_SCHEMA.md` as the target contract, but create only tables that have a coherent Stage 01 purpose.
 
-Preferred initial tables:
+Minimum Stage 01 contracts should establish:
 
-- `repositories`
-- `repository_snapshots`
-- `scores`
-- `candidates`
-- `analyses`
-- `editorial_decisions`
-- `publications`
-- `publication_attempts`
+- canonical project/provider identity uniqueness;
+- historical snapshot boundary;
+- publication idempotency.
 
-If a table would be ceremonial/empty without a coherent contract, document why it is deferred rather than inventing speculative columns.
+If later-domain tables would be ceremonial, defer them and document the decision.
 
 ### Domain contracts
 
-Add focused types/enums for:
+Add focused types/enums for implemented Stage 01 boundaries.
 
-- provider
-- candidate status
-- editorial decision
-- publication status/channel
-- OUTSCAN relevance enum
+Do not create one large shared types file.
 
-Do not put unrelated types into a single large file.
+### Health/readiness
 
-### Application health
+`/api/health/live`:
 
-Add a minimal health/readiness boundary that can distinguish process health from database readiness.
+- process health only;
+- no secrets or config dump.
 
-Do not expose secrets/config dumps.
+`/api/health/ready`:
+
+- database readiness;
+- generic safe failure output;
+- no credentials/internal connection detail.
 
 ### Tests
 
@@ -93,56 +123,62 @@ At minimum verify:
 
 1. configuration validation;
 2. invalid configuration fails safely;
-3. database migration can create the schema in an isolated test database if available;
-4. canonical repository identity uniqueness at DB level;
-5. publication idempotency uniqueness at DB level;
-6. health/readiness behavior;
-7. OUTSCAN feature flags default closed.
+3. OUTSCAN flags default closed;
+4. migration/schema initialization in an isolated PostgreSQL database when available;
+5. canonical provider identity uniqueness at DB level;
+6. publication idempotency uniqueness at DB level if publication table is introduced in Stage 01;
+7. liveness behavior;
+8. readiness success/failure behavior;
+9. server-only boundaries are not imported by client code where practical to test.
 
-If an integration test database is unavailable in the environment, keep the tests and clearly report that they were not executed; do not claim they passed.
+If an integration-test database is unavailable, keep the tests and clearly report that they were not executed.
 
 ### Security
 
-Apply `docs/SECURITY.md` to the implemented surface.
+Apply `docs/SECURITY.md`.
 
 Do not:
 
 - add a generic arbitrary URL fetcher;
-- add shell execution;
-- add repository code execution;
+- execute discovered repository code;
+- add shell execution features;
 - add public admin/auth shortcuts;
 - log environment variables;
-- commit tokens/credentials.
+- commit real credentials;
+- expose PostgreSQL publicly in production configuration;
+- create model/provider integrations.
 
 ### Documentation
 
 After implementation:
 
 - update `README.md` with actual setup and commands;
-- update `plan.md` Stage 01 checkboxes based on verified completion;
-- update `CHANGELOG.md` with durable changes;
-- document any intentionally deferred decision.
+- update `plan.md` Stage 01 checkboxes based only on verified completion;
+- update `CHANGELOG.md`;
+- document intentionally deferred schema/runtime choices.
 
-Evaluate Graphify only after the meaningful source/module structure exists. If you install it, use the project-scoped Codex integration and document the regeneration command. If blocked or unnecessary at this stage, record the decision in `plan.md` rather than forcing it.
+Evaluate Graphify only after meaningful source/module structure exists. If used, follow the project-scoped Codex setup documented by the modular-project instructions.
 
 ## Architecture/quality constraints
 
 - authored source files <=400 physical lines;
-- one clear primary responsibility per file;
+- one primary responsibility per file;
 - no circular imports;
-- no broad `utils.ts` dumping ground;
-- no Redis/queue/ORM/agent framework unless strictly necessary and justified;
-- no implementation of later stages.
+- no generic `utils.ts` dumping ground;
+- keep server-only code in server boundaries;
+- no Redis/Kafka/Kubernetes/vector DB/agent framework;
+- no implementation of Stages 02+.
 
 ## Verification gate
 
 Run all available relevant checks:
 
-- formatting/lint
+- format/lint
 - TypeScript typecheck
 - unit tests
-- database/integration tests if test PostgreSQL is available
-- production build
+- PostgreSQL integration tests when available
+- production Next.js build
+- worker build/type validation
 - source-file line-count check
 - final diff review for secrets/debug code/scope creep
 
@@ -157,7 +193,7 @@ Report only:
 3. database schema/migration summary;
 4. checks actually run and exact pass/fail state;
 5. anything not verified and why;
-6. remaining Stage 01 blockers, if any;
+6. remaining Stage 01 blockers;
 7. confirmation that Stages 02+ were not implemented.
 
 Stop after Stage 01. Do not continue automatically.
