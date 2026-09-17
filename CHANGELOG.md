@@ -30,3 +30,21 @@ All notable durable changes to VibeRadar are documented here.
 - Trusted human approval remains mandatory for initial publication.
 - Publication idempotency remains a mandatory invariant.
 - OUTSCAN remains isolated from VIBE SCORE, Trend Velocity, confidence, candidate selection, and editorial ranking.
+
+
+## 2026-09-18
+
+### Added
+
+- Added executable implementation specification covering runtime shape, module boundaries, public routes, write boundaries, stage order, and stage definition-of-done.
+- Added PostgreSQL schema contract with canonical identity, snapshot history, versioned scoring/confidence/buildability, editorial audit, and publication idempotency.
+- Added background jobs and processing-pipeline contract covering bounded retries, concurrency, scheduling, cost controls, observability, and manual replay.
+- Added deployment/operations contract for local/test/production environments, reverse proxy/TLS, health/readiness, structured logging, metrics, backups, restore, rollback, and incident basics.
+- Added test strategy spanning unit, PostgreSQL integration, provider-contract, security-negative, web/component, and high-value end-to-end coverage.
+- Added strict light-minimal web visual system: flat surfaces, no decorative gradients/glows/glassmorphism, no routine card shadows, data-first layouts, restrained blue accent, and real-data-only UI.
+
+### Changed
+
+- Aligned `CODEX_STAGE_01.md` with the canonical Next.js App Router + separate worker + PostgreSQL/Drizzle architecture.
+- Replaced the obsolete Fastify-first roadmap with the current staged implementation path.
+- Clarified that the MVP web surface begins with a restrained light shell and later adds real radar/project/methodology pages only when supporting data exists.
