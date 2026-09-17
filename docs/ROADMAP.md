@@ -1,101 +1,181 @@
-# Roadmap — Vibe Radar
+# Roadmap — VibeRadar
 
-## Phase A — Telegram-first MVP
+## Phase A — Core MVP
 
-### Stage 00 — Documentation
+### Stage 00 — Product and implementation specification
 
-Product, architecture, data model, security, scoring, AI and editorial contracts.
+Completed documentation contracts:
+
+- product and audience
+- architecture
+- source trust/provenance
+- data model and database schema
+- scoring/confidence
+- buildability
+- AI trust boundary
+- editorial/publishing
+- security
+- web visual system
+- jobs/pipeline
+- operations/deployment
+- test strategy
+- OUTSCAN separation
 
 ### Stage 01 — Foundation
 
-- TypeScript/Fastify project shell
-- PostgreSQL
-- migrations
-- config
+- Node.js 24+ / TypeScript / pnpm
+- Next.js App Router application shell
+- separate worker entry point
+- PostgreSQL + Drizzle
+- explicit migrations
+- validated configuration
 - health/readiness
-- tests/build/lint/typecheck
+- local Docker Compose
+- lint/typecheck/test/build
+- first light/minimal shell with no fake product data
 
 ### Stage 02 — GitHub discovery
 
-- read-only provider adapter
-- search/watchlist discovery
-- normalization
+- read-only GitHub provider adapter
+- configured search/watch discovery
+- source-event provenance
+- project/provider identity normalization
 - snapshots
-- provenance/rate limits
+- releases
+- rate-limit handling
+- bounded retry/timeout/concurrency
 
 ### Stage 03 — Growth engine
 
 - 2h/24h/7d deltas
 - percent growth
 - acceleration
-- freshness/activity
+- project age/freshness context
+- activity metrics
+- missing-window handling
+- reach separated from velocity
 
-### Stage 04 — VIBE SCORE v1
+### Stage 04 — VIBE SCORE + confidence
 
-- weighted deterministic score
+- deterministic versioned score
 - penalties
-- explanation
+- component breakdown
+- confidence model
 - candidate policy
+- 7/30-day calibration hooks
 
-### Stage 05 — AI analyzer
+### Stage 05 — Buildability
 
-- bounded project projection
-- structured output
-- injection tests
-- cost budget
+- dimension schema
+- `SOLO_MVP`
+- `SMALL_TEAM`
+- `TEAM_REQUIRED`
+- constraints/explanation
+- separate buildability provenance
 
-### Stage 06 — Telegram editor
+### Stage 06 — AI analysis
 
-- private editorial bot
-- authorization
-- candidate card
+- bounded evidence projection
+- structured output schema
+- prompt/model versioning
+- source traceability
+- prompt-injection negative tests
+- cost/token budget
+- explicit failure state
+
+### Stage 07 — Telegram editorial
+
+- private editor bot
+- trusted editor authorization
+- candidate evidence card
 - approve/watch/reject
-
-### Stage 07 — Telegram publisher
-
-- ContentModel
-- renderer
-- idempotent publish
+- callback/state validation
 - audit trail
 
-### Stage 08 — Operations
+### Stage 08 — Publishing + minimal web
 
-- schedules
-- bounded retries
-- metrics
-- production Docker deployment
-
-## Phase B — Owned media/data product
-
-- `viberadar.ru` catalog
+- normalized ContentModel
+- idempotent Telegram publishing
+- publication attempts/audit
+- `viberadar.ru` radar overview
 - project pages
-- trending/new/category views
-- project history charts/data
-- search
-- publication analytics
+- methodology page
+- evidence/source rendering
+- strict light minimal UI from `docs/WEB_UI.md`
+
+### Stage 09 — Operations
+
+- scheduler/worker claims
+- bounded retries/dead-letter-equivalent state
+- operational metrics
+- daily radar
+- weekly radar
+- basic publication analytics
+- production deployment
+- backup/restore verification
+
+## Phase B — Intelligence expansion
+
+### Stage 10 — Product Mechanic Radar
+
+- mechanic extraction proposals
+- independent-evidence grouping
+- editor-assisted clustering
+- lifecycle: `SPARK / RISING / BREAKOUT / ESTABLISHED`
+- mechanic confidence/velocity
+- public mechanic surfaces
+
+### Stage 11 — Opportunity Engine
+
+- evidence-linked opportunity generation
+- 1-3 opportunity cap
+- RU/GLOBAL scope
+- opportunity confidence
+- differentiation hypothesis
+- buildability reuse
+- public opportunity surfaces
+
+### Additional sources
+
+Add only after GitHub scoring quality can be measured:
+
+- Product Hunt
+- YC
+- major engineering/platform sources
+- community discovery sources with explicit trust tiers
+- RU ecosystem sources where useful
 
 ## Phase C — Multi-channel
 
-- Instagram carousel renderer
+- Instagram carousel renderer from approved content
 - Instagram publishing
-- Reels pipeline after editorial quality is stable
-- website articles/SEO surfaces
+- Reels pipeline only after editorial quality is stable
+- richer SEO/editorial surfaces
 
-## Phase D — Personalization/community
+## Phase D — Personal intelligence
 
-- user watchlists
-- topic preferences
-- personalized Radar digests
-- community submissions
-- creator/project owner flows
+- user accounts only when needed
+- watchlists
+- topic/project preferences
+- personalized radar
+- Apply to your project
+- saved opportunities
+- team/B2B intelligence
 
-## Phase E — OUTSCAN
+## Phase E — Agent-facing product
 
-Only after required OUTSCAN readiness:
+- public/partner API
+- VibeRadar MCP
+- agent discovery queries
+- experimental Agent Preference Index kept separate from VIBE SCORE
 
-- contextual native CTA
+## Phase F — OUTSCAN
+
+Only after corresponding OUTSCAN capabilities are ready:
+
+- contextual security layer
+- native security notes for relevant content
 - campaign attribution
-- approved `OUTSCAN Check` editorial format
-- later security-related creator workflows
+- approved OUTSCAN Check format
 
-OUTSCAN never becomes a VIBE SCORE signal.
+OUTSCAN never affects VIBE SCORE, confidence, velocity, candidate selection, or editorial ranking.
