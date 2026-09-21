@@ -39,6 +39,8 @@ Completed documentation contracts:
 - read-only GitHub provider adapter
 - configured search/watch discovery
 - source-event provenance
+- primary EvidenceItem capture for discovery observations
+- evidence independence grouping
 - project/provider identity normalization
 - snapshots
 - releases
@@ -73,12 +75,16 @@ Completed documentation contracts:
 - constraints/explanation
 - separate buildability provenance
 
-### Stage 06 — AI analysis
+### Stage 06 — Evidence + AI analysis
 
+- ResearchRun lifecycle/reproducibility metadata
+- typed Claim records
+- EvidenceItem links with support/contradiction semantics
+- claim verification state
 - bounded evidence projection
 - structured output schema
 - prompt/model versioning
-- source traceability
+- claim-level source traceability
 - prompt-injection negative tests
 - cost/token budget
 - explicit failure state
@@ -113,6 +119,14 @@ Completed documentation contracts:
 - basic publication analytics
 - production deployment
 - backup/restore verification
+
+## Priority interpretation
+
+- **P0:** Stages 01-06. Build the native deterministic discovery, scoring, buildability, evidence, and analysis core.
+- **P1:** Stages 07-09. Make the system operational through trusted editorial review, publishing, web surfaces, and measurable operations.
+- **P2:** Stages 10-11. Add Product Mechanic Radar and Opportunity Engine only after the core loop produces useful candidates consistently.
+
+External agent runtimes and model routers are optional experiments behind the adoption gates in `docs/REFERENCE_REPOSITORIES.md`.
 
 ## Phase B — Intelligence expansion
 
@@ -149,7 +163,8 @@ Add only after GitHub scoring quality can be measured:
 
 - Instagram carousel renderer from approved content
 - Instagram publishing
-- Reels pipeline only after editorial quality is stable
+- Reels/Shorts pipeline only from approved ContentPiece records after editorial quality is stable
+- preserve a review gate for generated visual/video artifacts before automatic distribution is considered
 - richer SEO/editorial surfaces
 
 ## Phase D — Personal intelligence
