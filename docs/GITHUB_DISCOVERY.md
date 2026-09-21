@@ -70,7 +70,18 @@ Each discovered/updated repository should retain why it was seen:
 - manual seed;
 - later external source.
 
-## 8. Candidate volume control
+## 8. Evidence capture
+
+For primary GitHub observations used beyond discovery:
+
+- persist a normalized `EvidenceItem` linked to the originating `SourceEvent`;
+- keep bounded normalized facts instead of copying arbitrary provider text when possible;
+- assign an `independence_group` where forks, mirrors, or copied material could otherwise look independent;
+- do not treat a discovery event as automatic support for every later analytical claim.
+
+Detailed claim/evidence behavior is defined in `docs/EVIDENCE_MODEL.md`.
+
+## 9. Candidate volume control
 
 Discovery volume and AI analysis volume are different.
 
