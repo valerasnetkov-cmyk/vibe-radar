@@ -34,34 +34,13 @@ export async function POST(request: Request) {
       update.actorId,
       parseEditorIds(config.TELEGRAM_EDITOR_IDS),
     );
-    const bot = createEditorBot({
-      token: config.TELEGRAM_BOT_TOKEN!,
-      editorChatId: config.TELEGRAM_EDITOR_CHAT_ID!,
-    });
-    await bot.sendReviewCard({
-      text: `<b>REVIEW</b>\n<b>${result.status === "APPROVED" ? "Approval" : result.status === "REJECTED" ? "Rejection" : "Watch"}</b>\nCandidate ${result.candidateId}`,
-      inlineKeyboard: [
-        [
-          { text: "Approve", callback_data: `vr:approve:${result.candidateId}` },
-          { text: "Watch", callback_data: `vr:watch:${result.candidateId}` },
-          { text: "Reject", callback_data: `vr:reject:${result.candidateId}` },
-        ],
-      ],
-    });
-    const callbackQueryId = (body as any)?.callback_query?.id;
+    const callbackQueryId = update.callbackId;
     if (callbackQueryId) {
-      await fetch(
-        `https://api.telegram.org/bot${config.TELEGRAM_BOT_TOKEN}/answerCallbackQuery`,
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            callback_query_id: callbackQueryId,
-            text: "Decision processed",
-          }),
-          signal: AbortSignal.timeout(3000),
-        },
-      ).catch(() => {/* non-blocking */});
+      const bot = createEditorBot({
+        token: config.TELEGRAM_BOT_TOKEN!,
+        editorChatId: config.TELEGRAM_EDITOR_CHAT_ID!,
+      });
+      await bot.answerCallbackQuery(callbackQueryId, "Decision processed");
     }
     return Response.json({ ok: true, result });
   } catch (error) {

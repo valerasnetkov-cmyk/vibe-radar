@@ -16,8 +16,9 @@ export class EditorBot {
   }
 
   async sendReviewCard(card: EditorCard): Promise<{ providerMessageId: string }> {
+    const timeout = this.options.timeoutMs ?? 30000;
     const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), this.options.timeoutMs ?? 10000);
+    const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
     try {
       const response = await this.fetcher(
@@ -48,6 +49,26 @@ export class EditorBot {
         throw new TelegramPublishError("Editor bot publish failed");
 
       return { providerMessageId: String(parsed.result.message_id) };
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  async answerCallbackQuery(callbackQueryId: string, text: string): Promise<void> {
+    const timeout = this.options.timeoutMs ?? 10000;
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), timeout);
+
+    try {
+      await this.fetcher(`https://api.telegram.org/bot${this.options.token}/answerCallbackQuery`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          callback_query_id: callbackQueryId,
+          text,
+        }),
+        signal: abortController.signal,
+      });
     } finally {
       clearTimeout(timeoutId);
     }
