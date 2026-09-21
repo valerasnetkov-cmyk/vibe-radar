@@ -14,15 +14,16 @@ Ship the smallest end-to-end system that proves VibeRadar can discover, score, e
 6. VIBE SCORE v1
 7. confidence calculation
 8. buildability classification
-9. bounded AI analysis
-10. source/provenance display
-11. private Telegram editorial bot
-12. explicit human approval
-13. idempotent Telegram publishing
-14. minimal `viberadar.ru` project/signal pages
-15. daily radar generation
-16. weekly radar generation
-17. basic publication analytics
+9. claim/evidence package with ResearchRun provenance
+10. bounded AI analysis
+11. source/provenance display
+12. private Telegram editorial bot
+13. explicit human approval
+14. idempotent Telegram publishing
+15. minimal `viberadar.ru` project/signal pages
+16. daily radar generation
+17. weekly radar generation
+18. basic publication analytics
 
 ## Out of scope
 
@@ -36,6 +37,8 @@ Ship the smallest end-to-end system that proves VibeRadar can discover, score, e
 - Agent Preference Index
 - public API/MCP
 - autonomous execution of discovered repositories
+- external agent/control-plane frameworks as the production source of truth
+- multi-provider AI routing before a measured need exists
 - security scanning of arbitrary third-party targets
 
 ## Acceptance criteria
@@ -65,8 +68,11 @@ Ship the smallest end-to-end system that proves VibeRadar can discover, score, e
 - substantial candidates receive one of `SOLO_MVP`, `SMALL_TEAM`, `TEAM_REQUIRED`;
 - the classification preserves an explanatory breakdown rather than only a final label.
 
-### AI analysis
+### Evidence and AI analysis
 
+- candidate research creates a reproducible `ResearchRun`;
+- factual statements are represented as typed claims with evidence references;
+- supporting and contradicting evidence can coexist;
 - only bounded, normalized data is provided to the model;
 - output uses a strict schema;
 - provider/model/prompt version are recorded;
@@ -93,3 +99,17 @@ Ship the smallest end-to-end system that proves VibeRadar can discover, score, e
 ## MVP success test
 
 The MVP is successful when it can repeatedly produce a small number of genuinely useful, source-backed candidates with less editorial effort than manual discovery, while avoiding duplicate/noisy publication and preserving enough historical data to evaluate scoring quality after 7 and 30 days.
+
+
+## Alpha operating target
+
+The first useful Alpha should prove quality rather than collection volume.
+
+Initial operating target:
+
+- track roughly 50-100 repositories deeply enough to maintain longitudinal snapshots;
+- produce only a small editor-reviewed candidate set per day;
+- measure how many high-scoring candidates remain meaningful after 7 and 30 days;
+- expand source volume only after deduplication, provenance, and scoring quality are measurable.
+
+This is a calibration target, not a hard public-launch SLA.
