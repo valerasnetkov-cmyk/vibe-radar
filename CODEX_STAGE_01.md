@@ -146,7 +146,8 @@ Do not:
 - log environment variables;
 - commit real credentials;
 - expose PostgreSQL publicly in production configuration;
-- create model/provider integrations.
+- create model/provider integrations;
+- add Hermes Agent, DeepSeek Harness, Ruflo, OmniRoute, or equivalent orchestration/routing dependencies.
 
 ### Documentation
 
