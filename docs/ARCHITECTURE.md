@@ -20,6 +20,12 @@ PostgreSQL
   signals
   provenance
       ↓
+Evidence layer
+  research runs
+  claims
+  evidence items
+  verification
+      ↓
 Intelligence core
   velocity
   VIBE SCORE
@@ -84,6 +90,7 @@ src/
     scoring/            VIBE SCORE/versioning/breakdown
     confidence/         evidence confidence
     buildability/       implementation feasibility assessment
+    evidence/           research runs, claims, evidence links, verification
     mechanics/          Product Mechanic Radar (post-MVP automation)
     opportunities/      Opportunity Engine (post-MVP automation)
     analysis/           LLM projection/prompts/schema validation
@@ -155,7 +162,7 @@ Historical observations should remain append-oriented rather than mutable aggreg
 
 ## 7. Evidence vs generated analysis
 
-Keep these as distinct persistence concerns:
+Keep these as distinct persistence concerns.
 
 ### Evidence
 
@@ -164,6 +171,10 @@ Keep these as distinct persistence concerns:
 - repository/provider observations
 - snapshots
 - deterministic metrics
+- `ResearchRun` records
+- typed `Claim` records
+- `EvidenceItem` links that support or contradict a claim
+- verification state and independence-group metadata
 
 ### Generated interpretation
 
@@ -174,7 +185,9 @@ Keep these as distinct persistence concerns:
 - opportunity hypotheses
 - channel copy
 
-An LLM output must not become evidence merely because it has been persisted.
+A research run is an audit/reproducibility boundary, not proof by itself. An LLM output must not become evidence merely because it has been persisted. Factual prose should resolve to stored claims/evidence; unsupported interpretation must remain explicitly analytical.
+
+See `docs/EVIDENCE_MODEL.md`.
 
 ## 8. Scoring boundaries
 
@@ -232,3 +245,19 @@ The LLM cannot:
 - bypass deterministic validation.
 
 See `docs/SECURITY.md` and `docs/SOURCES_AND_TRUST.md`.
+
+
+## 12. Optional external runtimes
+
+VibeRadar owns its database, score calculation, evidence graph, editorial decisions, and publication state.
+
+External agent/control-plane tools may later be attached as bounded adapters or experimental workers, but they must not become the source of truth or receive authority to:
+
+- change VIBE SCORE or confidence policy;
+- approve editorial decisions;
+- publish without the normal publication gate;
+- mutate canonical project/evidence state outside validated application services;
+- execute discovered repositories;
+- receive unrestricted infrastructure credentials.
+
+Adoption decisions and current candidates are tracked in `docs/REFERENCE_REPOSITORIES.md`.
