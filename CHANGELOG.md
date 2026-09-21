@@ -48,3 +48,29 @@ All notable durable changes to VibeRadar are documented here.
 - Aligned `CODEX_STAGE_01.md` with the canonical Next.js App Router + separate worker + PostgreSQL/Drizzle architecture.
 - Replaced the obsolete Fastify-first roadmap with the current staged implementation path.
 - Clarified that the MVP web surface begins with a restrained light shell and later adds real radar/project/methodology pages only when supporting data exists.
+
+
+## 2026-09-21
+
+### Added
+
+- Added a claim-level evidence model with `ResearchRun`, `Claim`, `EvidenceItem`, verification states, independence groups, and reproducibility requirements.
+- Added a reference-repository register covering OpenResearch, Hermes Agent, DeepSeek Harness, Ruflo, OmniRoute, YouTube Automation Agent, and Paperclip with explicit adoption/defer gates.
+- Added an initial Alpha operating target of 50-100 tracked repositories with a small editor-reviewed candidate set rather than maximum collection volume.
+
+### Changed
+
+- Made evidence packaging a first-class step between deterministic intelligence and AI-generated interpretation.
+- Expanded the conceptual data model and architecture with an explicit evidence module and claim-level provenance.
+- Tightened AI analysis so factual statements resolve to stored claims/evidence while model interpretation remains visibly separate.
+- Clarified delivery priorities as P0 core intelligence, P1 editorial/publishing/operations, and P2 mechanic/opportunity intelligence.
+- Clarified that optional agent runtimes, multi-agent frameworks, and model routers are evaluated only after the native VibeRadar pipeline demonstrates a measured need.
+
+### Security
+
+- External agent/control-plane tools never become the VibeRadar system of record and cannot mutate scoring policy, approve publication, bypass editorial gates, or receive unrestricted infrastructure credentials.
+- Stage 01 explicitly excludes Hermes Agent, DeepSeek Harness, Ruflo, OmniRoute, and equivalent orchestration/routing dependencies.
+
+### Notes
+
+- Documentation-only change. No runtime code, dependencies, migrations, or deployment behavior were modified.
