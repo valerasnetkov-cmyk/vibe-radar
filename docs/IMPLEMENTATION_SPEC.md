@@ -20,6 +20,7 @@ GitHub
 -> calculate growth
 -> score + confidence
 -> buildability
+-> assemble claims/evidence
 -> analyze
 -> editorial review
 -> publish
@@ -83,6 +84,7 @@ src/
       scoring/
       confidence/
       buildability/
+      evidence/
       analysis/
       editorial/
       content/
@@ -184,6 +186,7 @@ Only these server-side flows may write during MVP:
 - normalization/entity resolution
 - snapshot/release persistence
 - deterministic metric/scoring jobs
+- claim/evidence/research-run persistence
 - validated analysis persistence
 - trusted editorial decisions
 - publication state transitions
@@ -196,11 +199,11 @@ Public pages are read-only.
 Implementation must proceed in bounded stages:
 
 1. Foundation
-2. GitHub discovery
+2. GitHub discovery + source provenance
 3. Growth engine
 4. VIBE SCORE + confidence
 5. Buildability
-6. AI analysis
+6. Evidence + AI analysis
 7. Telegram editorial
 8. Publishing + minimal web
 9. Scheduler/operations
@@ -239,6 +242,8 @@ Do not build during the initial MVP unless scope is changed explicitly:
 - public write APIs
 - community submissions
 - Instagram automation
+- external agent/control-plane frameworks as core runtime dependencies
+- multi-provider model routing before at least two providers and a measured routing/fallback need
 - automated Product Mechanic Radar
 - automated Opportunity Engine
 - VibeRadar MCP
