@@ -50,6 +50,7 @@ Initial editorial focus remains solo builders, vibe coders, and indie hackers.
 ## Core intelligence modules
 
 - Source ingestion and normalization
+- Claim-level evidence and reproducible ResearchRun lineage
 - Entity matching and deduplication
 - Longitudinal repository snapshots
 - Trend Velocity and acceleration
@@ -85,8 +86,8 @@ The first production slice focuses on a narrow end-to-end loop:
 4. normalization and deduplication
 5. VIBE SCORE + confidence
 6. buildability
-7. bounded AI analysis
-8. source/fact-check evidence
+7. claim/evidence package with reproducible provenance
+8. bounded AI analysis
 9. private Telegram editor bot
 10. manual approval
 11. idempotent Telegram publishing
@@ -139,6 +140,8 @@ See `docs/OUTSCAN_INTEGRATION.md`.
 - `docs/DATABASE_SCHEMA.md` - PostgreSQL table/constraint/index contract
 - `docs/GITHUB_DISCOVERY.md` - GitHub discovery rules
 - `docs/SOURCES_AND_TRUST.md` - evidence tiers and fact-check policy
+- `docs/EVIDENCE_MODEL.md` - ResearchRun, Claim, EvidenceItem and verification contract
+- `docs/REFERENCE_REPOSITORIES.md` - external repository patterns and adoption gates
 - `docs/VIBE_SCORE.md` - score/velocity contract
 - `docs/AI_ANALYSIS.md` - AI trust boundary
 - `docs/CONTENT_MODEL.md` - normalized content model
