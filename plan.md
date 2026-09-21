@@ -28,6 +28,8 @@ Canonical product concept is documented. Runtime implementation has not started.
 - [x] Operations/deployment contract documented
 - [x] Test strategy documented
 - [x] Stage 01 Codex brief aligned with Next.js + worker architecture
+- [x] Claim-level evidence/ResearchRun contract documented
+- [x] External reference repositories and adoption gates documented
 
 ## Stage 01 — Foundation
 
@@ -52,6 +54,8 @@ Canonical product concept is documented. Runtime implementation has not started.
 - [ ] Read-only GitHub API client
 - [ ] Query/source strategy
 - [ ] SourceEvent/provenance persistence
+- [ ] Evidence-item capture for primary discovery observations
+- [ ] Evidence independence-group rules
 - [ ] Project/provider identity normalization
 - [ ] Entity dedupe rules
 - [ ] Snapshot persistence
@@ -88,13 +92,17 @@ Canonical product concept is documented. Runtime implementation has not started.
 - [ ] Preserve explanation and constraints
 - [ ] Separate buildability from VIBE SCORE
 
-## Stage 06 — AI analysis
+## Stage 06 — Evidence + AI analysis
 
+- [ ] ResearchRun lifecycle and reproducibility metadata
+- [ ] Claim model and claim-type separation
+- [ ] EvidenceItem links with support/contradiction semantics
+- [ ] Verification states and claim-level fact-check pass
 - [ ] Bounded input projection
 - [ ] Strict output schema
 - [ ] Prompt versioning
 - [ ] Provider/model provenance
-- [ ] Source/evidence references
+- [ ] Source/evidence references on factual statements
 - [ ] Prompt-injection adversarial tests
 - [ ] Token/cost limits
 - [ ] Failure-state handling
@@ -149,6 +157,17 @@ Canonical product concept is documented. Runtime implementation has not started.
 - [ ] buildability reuse
 - [ ] public opportunity cards
 
+## Experimental/reference integrations
+
+These are not Stage 01 dependencies and must not become a second system of record.
+
+- [ ] Pilot Hermes Agent only after the native discovery -> evidence -> analysis -> editorial loop works
+- [ ] Evaluate DeepSeek Harness as an isolated Agent Lab after Stage 06
+- [ ] Benchmark Ruflo only if multi-agent orchestration becomes a measured bottleneck
+- [ ] Evaluate OmniRoute only after multiple AI providers create measurable routing/fallback/cost needs
+- [ ] Reuse review-gate/content-pipeline patterns from YouTube automation after approved-content generation is stable
+- [ ] Revisit Paperclip-style governance/budget patterns only for future agent operations
+
 ## Later
 
 - [ ] Additional source providers beyond GitHub
@@ -168,5 +187,7 @@ Canonical product concept is documented. Runtime implementation has not started.
 - Choose exact background job mechanism during Stage 01; prefer simplest DB-backed/single-worker approach first.
 - Choose exact Telegram bot library only when Telegram work begins.
 - Choose LLM provider/model only when AI analysis begins.
+- Keep the initial AI-provider abstraction native; add a router only after a measured multi-provider need.
+- Choose any external agent/control-plane runtime only after the native VibeRadar pipeline has baseline quality/operational metrics.
 - Decide authentication solution only when a user/admin surface requires it.
 - Define first non-GitHub source only after GitHub ingestion/scoring quality is measurable.
