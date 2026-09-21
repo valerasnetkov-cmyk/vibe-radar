@@ -124,3 +124,9 @@ The following are forbidden score inputs:
 - OUTSCAN CTA eligibility;
 - affiliate potential;
 - advertising campaign state.
+
+## 14. Initial implementation note
+
+The Stage 04 implementation bounds every component to `0..100`, applies the weights above, subtracts capped explainable penalties, and clamps the final score to `0..100`. The persisted algorithm identifier is `score_version = 1`; historical rows are append-only.
+
+Confidence is persisted separately with `confidence_version = 1`. It combines bounded evidence/source/history inputs and subtracts contradiction penalties. It is never used as a hidden replacement for VIBE SCORE.

@@ -96,3 +96,5 @@ The system must explain the match instead of returning only a label.
 ## Editorial boundary
 
 Opportunity text is analysis, not a factual claim. Public content should visually distinguish evidence about the underlying signal from the opportunity hypothesis derived from it.
+
+The initial implementation validates strict opportunity proposals, caps a generation batch at three items, stores source evidence separately, and derives opportunity confidence independently from source confidence. Public opportunity cards remain deferred until editorial and public-surface thresholds are connected.

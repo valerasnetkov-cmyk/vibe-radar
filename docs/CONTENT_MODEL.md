@@ -53,3 +53,5 @@ Telegram output should remain compact and factual:
 OUTSCAN enrichment may only be added after editorial approval and feature-flag checks.
 
 `outscan_relevance` is contextual metadata, not a score component.
+
+The initial implementation renders the normalized model to escaped Telegram HTML and validates project links as HTTP(S) URLs. Publication remains behind deterministic approval and idempotency checks; channel renderers do not authorize publication.

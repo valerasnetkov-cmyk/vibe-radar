@@ -148,6 +148,14 @@ MVP operational metrics:
 
 Product-quality metrics are separate from operational metrics.
 
+The initial implementation stores job lifecycle records in `job_runs`, caps attempts, records normalized error codes, and keeps scheduler execution in the worker process. The scheduler has no public listener and does not create work when no job handler is configured.
+
+Daily and weekly digest builders operate on persisted publication timestamps only. Publication analytics accepts normalized provider events; it does not infer views or clicks when a channel has not supplied them.
+
+GitHub collection is opt-in through validated query and interval configuration. The worker registers no collection job when the query list is empty. AI candidate consumption is guarded by a UTC daily budget before a provider call is allowed.
+
+Candidate selection reads only the latest persisted score and confidence records. It cannot transition a candidate to approval or publication; those remain separate trusted editorial/publishing boundaries.
+
 ## 10. Backups
 
 Before public launch:
@@ -197,3 +205,7 @@ Do not launch publicly until verified:
 - backup/restore procedure exists;
 - lint/typecheck/tests/build pass;
 - no unresolved Critical/High security finding remains.
+
+## 14. Daily audit
+
+Significant implementation and operational changes are recorded in both `CHANGELOG.md` and the corresponding UTC file under `docs/audits/`. Each daily audit must include verification results, security notes, blockers, and the next focus. Missing infrastructure checks must be stated explicitly rather than inferred from unit tests.

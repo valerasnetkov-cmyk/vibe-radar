@@ -80,3 +80,5 @@ A public mechanic card should normally require:
 ## Relationship to VIBE SCORE
 
 Mechanic lifecycle and velocity are separate from repository VIBE SCORE. A high-score project may create an early mechanic signal, but cannot by itself establish a trend.
+
+The initial implementation validates bounded proposals, groups evidence by `independence_group`, and derives lifecycle/confidence deterministically. LLM/editor proposals can create evidence for review, but public mechanic cards remain deferred until traceability and threshold checks are connected to a public surface.

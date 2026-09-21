@@ -160,3 +160,21 @@ See `docs/OUTSCAN_INTEGRATION.md`.
 ## Graphify
 
 Do not initialize Graphify for documentation-only work. After the first meaningful source/module structure exists, evaluate project-scoped Graphify integration and record the result in `plan.md`.
+
+## Local development
+
+Requirements: Node.js 24+, pnpm, and Docker Desktop for PostgreSQL integration checks.
+
+```bash
+pnpm install
+pnpm exec next dev
+pnpm dev:worker
+```
+
+Start PostgreSQL and apply the explicit foundation migration with `docker compose up -d postgres` and `pnpm db:migrate`.
+
+Verification commands are `pnpm lint`, `pnpm format`, `pnpm typecheck`, `pnpm test`, `pnpm test:integration`, `pnpm build`, and `pnpm check:lines`.
+
+AI execution enforces bounded output size, retry attempts, and a UTC daily candidate budget before provider work.
+
+Stage 01 contains the runtime shell, worker boundary, configuration, health endpoints, and foundation persistence contracts. Stage 02 now includes a read-only GitHub client, normalized repository identity, source provenance persistence, bounded retries, fixed API boundaries, bucketed historical snapshots, and release ingestion. Stage 03 includes deterministic 2h/24h/7d growth deltas, percentages, acceleration, and explicit insufficient-history states. Stage 04 includes bounded VIBE SCORE v1 components, explainable penalties, versioned confidence assessments, buildability classification, and deterministic candidate selection. Stage 06 includes bounded AI input projection, strict output validation, provenance, timeout handling, and failure states. Stage 07 includes Telegram webhook secret verification, strict callbacks, editor candidate cards, allow-list authorization, atomic decision transitions, and editorial audit records. Stage 08 includes normalized content, safe Telegram rendering/publishing boundaries, publication idempotency, and minimal honest web routes. Stage 09 includes bounded job retries, dead-letter state, operational metrics, configurable GitHub collection and score schedules, candidate selection from latest score/confidence, and a UTC AI daily budget. Score calculation uses persisted snapshots and skips projects without observations. Stage 10 provides evidence-grouped mechanics and `/mechanics`; Stage 11 provides capped evidence-linked opportunities, buildability reuse, and `/opportunities`.

@@ -122,6 +122,8 @@ The label must be derived from dimensions such as frontend/backend complexity, i
 
 It is not a generic difficulty label. It estimates whether the core product value can be implemented by the stated team shape, including realistic AI/Codex assistance.
 
+The initial implementation preserves ten explicit dimensions: frontend, backend, infrastructure, external APIs, AI dependency, auth/billing, data requirements, security/compliance, realtime/mobile, and operations. The assessment is versioned and stores constraints and an explanation separately from VIBE SCORE.
+
 ## 8. Trend stages
 
 Mechanics and broader trends use a simple lifecycle:

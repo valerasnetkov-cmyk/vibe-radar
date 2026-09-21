@@ -38,3 +38,9 @@ postgres-data/
 
 # Generated architecture output; decide later whether to commit
 # graphify-out/
+.next/
+tsconfig.tsbuildinfo
+node_modules/
+.env
+.env.*
+!.env.example

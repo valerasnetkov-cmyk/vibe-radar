@@ -51,6 +51,8 @@ Actions:
 - `Watch`
 - `Reject`
 
+The current implementation validates callbacks in the server boundary, checks the configured editor allow-list independently, and applies the decision only from `CANDIDATE` or `REVIEW`. Each accepted transition creates an append-only editorial decision record. Telegram transport and card rendering are added in the next slice.
+
 ## 4. Authorization
 
 Editor actions must be accepted only from configured trusted editor identities.
