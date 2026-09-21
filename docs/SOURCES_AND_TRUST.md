@@ -51,10 +51,26 @@ Use only for early discovery unless independently confirmed:
 4. Conflicting sources reduce confidence and must not be silently reconciled by the model.
 5. Missing evidence reduces confidence rather than being filled with assumptions.
 6. Generated product opportunities are explicitly analytical outputs, not source facts.
+7. Every factual statement intended for publication should resolve to one or more stored `Claim`/`EvidenceItem` relations.
+8. Reposts, forks, mirrors, and syndicated copies must not be counted as independent confirmation merely because they have different URLs.
+9. Contradicting evidence is preserved and surfaced; it is never silently deleted to make a claim look cleaner.
+
+## Claim-level evidence
+
+Use the following separation:
+
+```text
+SourceEvent -> EvidenceItem -> Claim -> Verification
+                    \-> ResearchRun lineage
+```
+
+An `EvidenceItem` records what was observed. A `Claim` records the statement being evaluated. The relation states whether the evidence supports, contradicts, or only contextualizes the claim.
+
+Use `independence_group` to prevent the same origin from being counted repeatedly through mirrors/forks/reposts.
 
 ## Provenance
 
-Every normalized observation should preserve:
+Every normalized observation/evidence item should preserve:
 
 - source type
 - source URL or stable source identifier
@@ -62,6 +78,8 @@ Every normalized observation should preserve:
 - observed timestamp when different
 - raw/normalized payload reference
 - parser/provider version where relevant
+- content hash/reference where useful
+- research-run linkage when the evidence was collected for verification
 
 ## Confidence inputs
 
@@ -93,3 +111,19 @@ The editor must be able to distinguish:
 - speculative opportunity
 
 The UI/content model must not collapse these into a single undifferentiated narrative.
+
+
+## ResearchRun reproducibility
+
+For candidate research, preserve enough context to explain later:
+
+- which project/signal was researched;
+- which snapshots/source events were available;
+- which claims were created or rechecked;
+- which model/prompt/provider version was used, if any;
+- which evidence supported or contradicted the final copy;
+- whether the run completed, failed, or was superseded.
+
+ResearchRun lineage improves auditability but does not increase confidence by itself.
+
+See `docs/EVIDENCE_MODEL.md`.
