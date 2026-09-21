@@ -26,6 +26,7 @@ const environmentSchema = z.object({
   TELEGRAM_WEBHOOK_SECRET: optionalString(z.string().min(16)),
   TELEGRAM_BOT_TOKEN: optionalString(z.string().min(1)),
   TELEGRAM_CHANNEL_ID: optionalString(z.string().min(1)),
+  TELEGRAM_EDITOR_CHAT_ID: optionalString(z.string().min(1)),
   TELEGRAM_API_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30000).default(10000),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().min(1000).max(300000).default(30000),
   WORKER_MAX_JOB_ATTEMPTS: z.coerce.number().int().min(1).max(5).default(3),
