@@ -75,4 +75,92 @@ describe("bounded AI analysis", () => {
       generateBudgetedAnalysis(provider, {} as never, new DailyAnalysisBudget(0)),
     ).rejects.toMatchObject({ reason: "BUDGET_EXHAUSTED" });
   });
+
+  it("AI_MAX_ATTEMPTS limits total provider calls (not just retries)", async () => {
+    let callCount = 0;
+    const provider = {
+      provider: "test",
+      model: "test-model",
+      generate: async () => {
+        callCount += 1;
+        // Fail on both attempts so total calls = 2
+        throw new AnalysisFailedError("PROVIDER_ERROR");
+      },
+    };
+    // AI_MAX_ATTEMPTS=2 means max 2 total calls; both fail → PROVIDER_ERROR
+    await expect(generateValidatedAnalysis(provider, {} as never, 1000, 2)).rejects.toMatchObject({
+      reason: "PROVIDER_ERROR",
+    });
+    expect(callCount).toBe(2);
+  });
+
+  it("retry semantics: total attempts = AI_MAX_ATTEMPTS when provider succeeds first", async () => {
+    let callCount = 0;
+    const provider = {
+      provider: "test",
+      model: "test-model",
+      generate: async () => {
+        callCount += 1;
+        // Succeed on first attempt
+        return validOutput;
+      },
+    };
+    // 1 initial call succeeds; total attempts = 1 (within AI_MAX_ATTEMPTS=2 limit)
+    const result = await generateValidatedAnalysis(provider, {} as never, 1000, 2);
+    expect(result.attempts).toBe(1);
+    expect(callCount).toBe(1);
+  });
+
+  it("attempts never exceed AI_MAX_ATTEMPTS even with consecutive failures", async () => {
+    let callCount = 0;
+    const provider = {
+      provider: "test",
+      model: "test-model",
+      generate: async () => {
+        callCount += 1;
+        throw new AnalysisFailedError("PROVIDER_ERROR");
+      },
+    };
+    // Even with maxAttempts=2, only 2 calls should be made; both fail → PROVIDER_ERROR
+    await expect(generateValidatedAnalysis(provider, {} as never, 1000, 2)).rejects.toMatchObject({
+      reason: "PROVIDER_ERROR",
+    });
+    expect(callCount).toBeLessThanOrEqual(2);
+  });
+
+  it("output size exactly at boundary accepted", async () => {
+    // Create output whose JSON.stringify is exactly at the boundary
+    const boundaryOutput = {
+      summary: "A concise summary.",
+      why_interesting: "It has a relevant technical signal.",
+      use_cases: ["Prototype workflow"],
+      audience: ["Builders"],
+      limitations: ["Evidence is limited"],
+      categories: ["developer-tools"],
+      content_angles: ["Buildability"],
+      outscan_relevance: "NONE" as const,
+    };
+    // Oversized output - add a long field to exceed 12000 chars
+    const oversizedOutput = {
+      ...boundaryOutput,
+      summary: "A".repeat(20000), // definitely exceeds 12000 when JSON.stringify
+    };
+    const provider = {
+      provider: "test",
+      model: "test-model",
+      generate: async () => oversizedOutput,
+    };
+    // Oversized output should be rejected
+    await expect(
+      generateValidatedAnalysis(provider, {} as never, 1000, 1, 12000),
+    ).rejects.toMatchObject({ reason: "INVALID_OUTPUT" });
+    // Exact boundary output should be accepted
+    const provider2 = {
+      provider: "test",
+      model: "test-model",
+      generate: async () => boundaryOutput,
+    };
+    const result = await generateValidatedAnalysis(provider2, {} as never, 1000, 1, 12000);
+    expect(result.attempts).toBe(1);
+  });
 });

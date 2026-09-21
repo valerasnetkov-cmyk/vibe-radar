@@ -24,7 +24,10 @@ export function verifyTelegramWebhookSecret(
   received: string | null,
   expected: string | undefined,
 ): boolean {
-  if (!expected) return true; // no secret configured → allow in development
+  if (!expected) {
+    // Development / test fallback: allow without configured secret
+    return process.env.NODE_ENV !== "production";
+  }
   if (!received) return false;
   const receivedBuffer = Buffer.from(received);
   const expectedBuffer = Buffer.from(expected);

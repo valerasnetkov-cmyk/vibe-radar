@@ -21,7 +21,7 @@ export async function runBoundedAnalysis(
   timeoutMs = 15000,
   maxAttempts = 1,
 ) {
-  for (let attempt = 0; attempt <= maxAttempts; attempt += 1) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     try {
       const output = await Promise.race([
         provider.generate(input),
@@ -31,7 +31,7 @@ export async function runBoundedAnalysis(
       ]);
       return { output, attempts: attempt + 1 };
     } catch (error) {
-      if (attempt === maxAttempts) {
+      if (attempt === maxAttempts - 1) {
         if (error instanceof AnalysisFailedError) throw error;
         throw new AnalysisFailedError("PROVIDER_ERROR");
       }
