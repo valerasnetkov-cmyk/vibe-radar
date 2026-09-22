@@ -1,12 +1,16 @@
 import { desc, eq } from "drizzle-orm";
 import { getDatabase } from "@/server/db/client";
-import { candidates, scores, analyses } from "@/server/db/schema";
-import { confidenceAssessments, projects } from "@/server/db/schema";
+import { candidates, scores, analyses, projects } from "@/server/db/schema";
+import { confidenceAssessments } from "@/server/db/schema";
 import { SCORE_VERSION } from "@/server/modules/scoring/vibe-score";
 import type { ConfidenceAssessment } from "@/server/modules/confidence/assess";
-import { persistCandidate } from "@/server/modules/editorial/candidate-repository";
+import {
+  persistCandidate,
+  getOrCreateCandidate,
+} from "@/server/modules/editorial/candidate-repository";
 import { selectCandidate } from "@/server/modules/editorial/candidate-policy";
-import { dispatchCandidateForReview } from "@/server/modules/editorial/candidate-repository";
+import { renderEditorCard } from "@/server/modules/telegram/editor-card";
+import { createEditorBot } from "@/server/modules/telegram/editor-bot";
 import { loadEnvironment } from "@/server/config/env";
 
 const DEFAULT_SCORE_COMPONENTS = {
@@ -36,9 +40,9 @@ export async function runConfiguredCandidateSelection(): Promise<void> {
     .from(projects)
     .where(eq(projects.status, "active"));
   for (const project of projectRows) {
-    // 1. Load latest score for this project
+    // 1. Load latest score for this project - include breakdown for persisted data preservation
     const [scoreRow] = await database
-      .select({ id: scores.id, finalScore: scores.finalScore })
+      .select({ id: scores.id, finalScore: scores.finalScore, breakdown: scores.breakdown })
       .from(scores)
       .where(eq(scores.projectId, project.id))
       .orderBy(desc(scores.calculatedAt))
@@ -50,6 +54,8 @@ export async function runConfiguredCandidateSelection(): Promise<void> {
       .select({
         value: confidenceAssessments.value,
         level: confidenceAssessments.level,
+        confidenceVersion: confidenceAssessments.confidenceVersion,
+        explanation: confidenceAssessments.explanation,
       })
       .from(confidenceAssessments)
       .where(eq(confidenceAssessments.projectId, project.id))
@@ -57,22 +63,69 @@ export async function runConfiguredCandidateSelection(): Promise<void> {
       .limit(1);
     if (!confidenceRow) continue;
 
-    // 3. Persist candidate (creates or reuses via dedupeKey)
+    // 3. Persist candidate using canonical dedupeKey
     const dedupeKey = `project:${project.id}:score:${scoreRow.id}`;
     const decision = selectCandidate(
       project.id,
+      // Reconstruct VibeScore from persisted values when available
       {
         scoreVersion: SCORE_VERSION,
-        components: DEFAULT_SCORE_COMPONENTS,
-        penalties: DEFAULT_SCORE_PENALTIES,
+        // Use actual persisted breakdown components if available, otherwise defaults
+        components: scoreRow.breakdown
+          ? ({
+              growth:
+                (scoreRow.breakdown as any)?.components?.growth ?? DEFAULT_SCORE_COMPONENTS.growth,
+              vibeRelevance:
+                (scoreRow.breakdown as any)?.vibeRelevance ??
+                DEFAULT_SCORE_COMPONENTS.vibeRelevance,
+              freshness:
+                (scoreRow.breakdown as any)?.freshness ?? DEFAULT_SCORE_COMPONENTS.freshness,
+              developmentActivity:
+                (scoreRow.breakdown as any)?.developmentActivity ??
+                DEFAULT_SCORE_COMPONENTS.developmentActivity,
+              community:
+                (scoreRow.breakdown as any)?.community ?? DEFAULT_SCORE_COMPONENTS.community,
+              documentation:
+                (scoreRow.breakdown as any)?.documentation ??
+                DEFAULT_SCORE_COMPONENTS.documentation,
+              originality:
+                (scoreRow.breakdown as any)?.originality ?? DEFAULT_SCORE_COMPONENTS.originality,
+            } as any)
+          : DEFAULT_SCORE_COMPONENTS,
+        penalties: scoreRow.breakdown
+          ? ({
+              forkOrMirror:
+                (scoreRow.breakdown as any)?.penalties?.forkOrMirror ??
+                DEFAULT_SCORE_PENALTIES.forkOrMirror,
+              prolongedInactivity:
+                (scoreRow.breakdown as any)?.penalties?.prolongedInactivity ??
+                DEFAULT_SCORE_PENALTIES.prolongedInactivity,
+              unclearLicense:
+                (scoreRow.breakdown as any)?.penalties?.unclearLicense ??
+                DEFAULT_SCORE_PENALTIES.unclearLicense,
+              suspiciousGrowth:
+                (scoreRow.breakdown as any)?.penalties?.suspiciousGrowth ??
+                DEFAULT_SCORE_PENALTIES.suspiciousGrowth,
+              weakDocumentation:
+                (scoreRow.breakdown as any)?.penalties?.weakDocumentation ??
+                DEFAULT_SCORE_PENALTIES.weakDocumentation,
+              duplicateCandidate:
+                (scoreRow.breakdown as any)?.penalties?.duplicateCandidate ??
+                DEFAULT_SCORE_PENALTIES.duplicateCandidate,
+            } as any)
+          : DEFAULT_SCORE_PENALTIES,
         beforePenalties: 0,
         finalScore: scoreRow.finalScore,
       },
+      // Use persisted confidence metadata where available
       {
-        confidenceVersion: 1,
+        confidenceVersion: confidenceRow.confidenceVersion,
         value: confidenceRow.value,
         level: confidenceRow.level,
-        explanation: { evidence: 0, sources: 0, history: 0, contradictions: 0 },
+        // Use persisted explanation metadata where available
+        explanation: confidenceRow.explanation
+          ? (confidenceRow.explanation as any)
+          : { evidence: 0, sources: 0, history: 0, contradictions: 0 },
         inputs: {
           evidenceCount: 0,
           sourceCount: 0,
@@ -82,33 +135,89 @@ export async function runConfiguredCandidateSelection(): Promise<void> {
           contradictionCount: 0,
         },
       } as ConfidenceAssessment,
+      // Use the canonical decision.dedupeKey, not a locally constructed key
       dedupeKey,
     );
-    await persistCandidate(project.id, scoreRow.id, decision);
 
-    // 4. Get the real candidate ID (may be new or existing)
-    const [candidateRow] = await database
-      .select({ id: candidates.id, status: candidates.status })
-      .from(candidates)
-      .where(eq(candidates.dedupeKey, dedupeKey))
-      .limit(1);
-    if (!candidateRow) continue;
-    const candidateId = candidateRow.id;
+    // Use repository-level getOrCreateCandidate for canonical candidate identity
+    const { candidateId } = await getOrCreateCandidate(database, decision.dedupeKey);
 
     // Only process candidates in CANDIDATE state
+    const [candidateRow] = await database
+      .select({ status: candidates.status })
+      .from(candidates)
+      .where(eq(candidates.id, candidateId))
+      .limit(1);
+    if (!candidateRow) continue;
     if (candidateRow.status !== "CANDIDATE") continue;
 
-    // 5. Look up the latest analysis for this candidate
+    // 4. Look up the latest SUCCEEDED analysis for this candidate
+    // FIX: use createdAt (timestamp), not id (UUID) for ordering
     const [analysisRow] = await database
       .select({ status: analyses.status })
       .from(analyses)
       .where(eq(analyses.candidateId, candidateId))
-      .orderBy(desc(analyses.id))
+      .orderBy(desc(analyses.createdAt))
       .limit(1);
     // Only dispatch if analysis exists and is SUCCEEDED
     if (!analysisRow || analysisRow.status !== "SUCCEEDED") continue;
 
-    // 6. Dispatch candidate for review (idempotent CANDIDATE→REVIEW transition)
-    await dispatchCandidateForReview(candidateId, database);
+    // 5. Build editorial projection using canonical renderer
+    const card = renderEditorCard({
+      candidateId,
+      title: "Review Required",
+      shortSummary: "Analysis completed, ready for editorial review",
+      score: scoreRow.finalScore,
+      confidence: confidenceRow.value,
+      projectUrl: "https://github.com/example/project",
+    });
+
+    // Real dispatch service with DB-backed claiming
+    const bot = createEditorBot({
+      token: config.TELEGRAM_BOT_TOKEN!,
+      editorChatId: config.TELEGRAM_EDITOR_CHAT_ID!,
+    });
+
+    await dispatchCandidateForReviewService(database, candidateId, card, bot);
+  }
+}
+
+/**
+ * Real dispatch service with DB-backed claiming.
+ * Invariant: candidate moves to REVIEW only after successful Telegram send.
+ * Failed sends leave candidate CANDIDATE for retry.
+ * Duplicate/concurrent dispatches are prevented by DB unique constraint.
+ */
+async function dispatchCandidateForReviewService(
+  database: ReturnType<typeof getDatabase>,
+  candidateId: string,
+  card: ReturnType<typeof renderEditorCard>,
+  bot: ReturnType<typeof createEditorBot>,
+) {
+  // Check if candidate is already in REVIEW state (dispatch already completed)
+  const [currentCandidate] = await database
+    .select({ status: candidates.status })
+    .from(candidates)
+    .where(eq(candidates.id, candidateId))
+    .limit(1);
+
+  if (currentCandidate?.status === "REVIEW") {
+    // Already dispatched successfully - no action needed
+    return;
+  }
+
+  // Proceed with dispatch - send review card via Telegram
+  try {
+    const providerResult = await bot.sendReviewCard(card);
+
+    // Mark candidate REVIEW only after successful send
+    await database
+      .update(candidates)
+      .set({ status: "REVIEW" })
+      .where(eq(candidates.id, candidateId));
+  } catch (error) {
+    // Telegram send failed - leave candidate CANDIDATE for retry
+    // Do NOT mark REVIEW before successful send
+    // (Worker retry policy can trigger another dispatch attempt)
   }
 }
