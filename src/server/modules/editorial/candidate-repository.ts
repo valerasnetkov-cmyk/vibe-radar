@@ -13,10 +13,15 @@ export type GetOrCreateCandidateResult = {
 /**
  * Get existing candidate by dedupeKey, or create a new one.
  * Uses onConflictDoNothing + second lookup for reliability.
+ * Receives all required data - no empty strings for UUID columns.
  */
 export async function getOrCreateCandidate(
   database: ReturnType<typeof getDatabase>,
+  projectId: string,
+  scoreId: string,
+  reason: string,
   dedupeKey: string,
+  expiresAt?: Date,
 ): Promise<GetOrCreateCandidateResult> {
   // Try to find existing candidate first
   const [existing] = await database
@@ -29,84 +34,34 @@ export async function getOrCreateCandidate(
     return { candidateId: existing.id, created: false };
   }
 
-  // Create new candidate - onConflictDoNothing handles concurrent creation
-  const insertResult = await database
-    .insert(candidates)
-    .values({
-      projectId: "",
-      scoreId: "",
-      reason: "",
-      status: "CANDIDATE",
-      dedupeKey,
-      expiresAt: undefined,
-    })
-    .onConflictDoNothing({ target: candidates.dedupeKey });
-
-  // After onConflictDoNothing, do a second lookup to get the actual candidate
-  const [lookup] = await database
-    .select({ id: candidates.id })
-    .from(candidates)
-    .where(eq(candidates.dedupeKey, dedupeKey))
-    .limit(1);
-
-  if (lookup?.id) {
-    return { candidateId: lookup.id, created: false };
-  }
-
-  // Fallback - generate a UUID if lookup fails
-  return { candidateId: crypto.randomUUID(), created: true };
-}
-
-/**
- * Persist a new candidate or reuse existing.
- * Returns the candidateId that should be used.
- */
-export async function persistCandidate(
-  projectId: string,
-  scoreId: string,
-  decision: CandidateDecision,
-  expiresAt?: Date,
-) {
-  if (!decision.selected) return;
-  return getDatabase()
+  // Create new candidate with real UUID foreign keys
+  const [newlyCreated] = await database
     .insert(candidates)
     .values({
       projectId,
       scoreId,
-      reason: decision.reason,
+      reason,
       status: "CANDIDATE",
-      dedupeKey: decision.dedupeKey,
+      dedupeKey,
       expiresAt,
     })
     .onConflictDoNothing({ target: candidates.dedupeKey })
     .returning({ id: candidates.id });
-}
 
-/**
- * Dispatch candidate for review - atomic CANDIDATE→REVIEW transition.
- * Returns whether the transition was successful.
- */
-export async function dispatchCandidateForReview(
-  candidateId: string,
-  database: ReturnType<typeof getDatabase>,
-): Promise<{ success: boolean; candidateId: string }> {
-  const [updated] = await database
-    .update(candidates)
-    .set({ status: CANDIDATE_STATUS_REVIEW })
-    .where(and(eq(candidates.id, candidateId), eq(candidates.status, "CANDIDATE")))
-    .returning();
-
-  if (!updated) {
-    const [current] = await database
-      .select({ status: candidates.status })
+  if (newlyCreated) {
+    // Second lookup to get the actual candidate after potential conflict.
+    // newlyCreated is only defined when this worker performed the insert.
+    const [lookup] = await database
+      .select({ id: candidates.id })
       .from(candidates)
-      .where(eq(candidates.id, candidateId));
+      .where(eq(candidates.dedupeKey, dedupeKey))
+      .limit(1);
 
-    if (current?.status === CANDIDATE_STATUS_REVIEW) {
-      return { success: false, candidateId };
+    if (lookup?.id) {
+      return { candidateId: lookup.id, created: true };
     }
-    return { success: false, candidateId };
   }
 
-  return { success: true, candidateId: updated.id };
+  // If we get here, neither insert nor lookup returned a valid row
+  throw new Error(`Cannot create or find candidate with dedupeKey=${dedupeKey}`);
 }

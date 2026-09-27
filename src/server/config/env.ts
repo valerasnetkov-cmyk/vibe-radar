@@ -63,6 +63,29 @@ export function parseEditorIds(value: string): Set<string> {
   );
 }
 
+export type TelegramEditorConfig = {
+  botToken: string;
+  editorChatId: string;
+  editorIds: Set<string>;
+  timeoutMs: number;
+};
+
+/**
+ * Narrow runtime validator for the Telegram editorial dispatch path only.
+ * Fails closed when the feature is used; unrelated test/dev commands must
+ * not call this helper so they never require Telegram settings.
+ */
+export function requireTelegramEditorConfig(config: RuntimeConfig): TelegramEditorConfig {
+  const botToken = config.TELEGRAM_BOT_TOKEN;
+  const editorChatId = config.TELEGRAM_EDITOR_CHAT_ID;
+  const editorIds = parseEditorIds(config.TELEGRAM_EDITOR_IDS);
+  const timeoutMs = config.TELEGRAM_API_TIMEOUT_MS;
+  if (!botToken || !editorChatId || editorIds.size === 0) {
+    throw new Error("Telegram editorial configuration is incomplete");
+  }
+  return { botToken, editorChatId, editorIds, timeoutMs };
+}
+
 export function parseDiscoveryQueries(value: string, maximum = 10): string[] {
   return [
     ...new Set(

@@ -2,7 +2,7 @@
 
 ## Current status
 
-Canonical product concept is documented. Runtime implementation has not started.
+Runtime implementation is in progress through the staged delivery plan below. Stage 07 delivers the idempotent Telegram editorial dispatch lifecycle.
 
 ## Stage 00 — Product/architecture bootstrap
 
@@ -109,12 +109,20 @@ Canonical product concept is documented. Runtime implementation has not started.
 
 ## Stage 07 — Telegram editorial
 
-- [ ] Private editor bot
-- [ ] Authorized editor allow-list/identity
-- [ ] Candidate card
-- [ ] Approve / Watch / Reject
-- [ ] Callback validation
-- [ ] Audit trail
+- [x] Private editor bot
+- [x] Authorized editor allow-list/identity
+- [x] Candidate card
+- [x] Approve / Watch / Reject
+- [x] Callback validation
+- [x] Audit trail
+- [x] Canonical candidate get-or-create on `dedupe_key` with real project/score FKs
+- [x] Rejected threshold decisions never create candidates
+- [x] `editorial_review_dispatches` table with `UNIQUE(candidate_id)`
+- [x] Atomic DB-backed dispatch claim (one owner sends; SENT never resends)
+- [x] `providerMessageId` persisted before candidate moves to `REVIEW`
+- [x] Failed sends keep candidate `CANDIDATE` with safe error codes and bounded retries
+- [x] Editor cards built only from persisted project/analysis/score/confidence data
+- [x] Telegram provider validation with no token leakage and `TELEGRAM_API_TIMEOUT_MS`
 
 ## Stage 08 — Publishing + minimal web
 

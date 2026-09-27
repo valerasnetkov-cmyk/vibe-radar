@@ -1,4 +1,4 @@
-import { loadEnvironment, parseEditorIds } from "@/server/config/env";
+import { loadEnvironment, requireTelegramEditorConfig } from "@/server/config/env";
 import { applyEditorCallback } from "@/server/modules/editorial/decision";
 import {
   parseTelegramEditorUpdate,
@@ -29,16 +29,14 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid update" }, { status: 400 });
   }
   try {
-    const result = await applyEditorCallback(
-      update.data,
-      update.actorId,
-      parseEditorIds(config.TELEGRAM_EDITOR_IDS),
-    );
+    const telegram = requireTelegramEditorConfig(config);
+    const result = await applyEditorCallback(update.data, update.actorId, telegram.editorIds);
     const callbackQueryId = update.callbackId;
     if (callbackQueryId) {
       const bot = createEditorBot({
-        token: config.TELEGRAM_BOT_TOKEN!,
-        editorChatId: config.TELEGRAM_EDITOR_CHAT_ID!,
+        token: telegram.botToken,
+        editorChatId: telegram.editorChatId,
+        timeoutMs: telegram.timeoutMs,
       });
       await bot.answerCallbackQuery(callbackQueryId, "Decision processed");
     }

@@ -2,6 +2,19 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — Stage 07 Telegram editorial dispatch
+
+### Added
+
+- Canonical candidate get-or-create on `dedupe_key` with real project/score foreign keys; rejected threshold decisions never persist candidates.
+- `editorial_review_dispatches` table (`0010` migration) with `UNIQUE(candidate_id)` and `PENDING`/`SENT`/`FAILED` lifecycle.
+- Atomic DB-backed dispatch claim: one owner sends, `SENT` never resends, `FAILED` retries within a bounded budget.
+- `providerMessageId` persisted before candidates move to `REVIEW`; failures keep `CANDIDATE` with safe error codes.
+- Editor cards projected only from persisted project, provider URL, validated analysis, score, and confidence data.
+- `requireTelegramEditorConfig` fail-closed validation and `TELEGRAM_API_TIMEOUT_MS` propagation.
+- Stage 07 unit coverage (EditorBot provider matrix, card projection, breakdown/confidence reconstruction, config, error normalization) and PostgreSQL integration coverage for the dispatch lifecycle.
+- Documented external-delivery timeout ambiguity (at-most-once attempts, no exactly-once claim across Telegram).
+
 ## 2026-09-17
 
 ### Added

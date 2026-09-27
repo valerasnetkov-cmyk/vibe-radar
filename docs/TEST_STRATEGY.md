@@ -38,6 +38,10 @@ Cover:
 - snapshot uniqueness
 - candidate dedupe
 - publication idempotency
+- `editorial_review_dispatches` claim uniqueness and single-owner concurrency
+- success stores `providerMessageId` and moves candidate to `REVIEW`; failure keeps `CANDIDATE`
+- `SENT` dispatches never resend
+- latest analysis selected by `createdAt`
 - transactional state transitions
 - repository/query behavior used by critical flows
 
@@ -54,6 +58,9 @@ Cover:
 - provider rate-limit/error mapping
 - malformed payload rejection
 - upstream schema changes represented by fixture tests
+- `EditorBot.sendReviewCard` chat id, HTML parse mode, inline keyboard, and provider message id
+- `EditorBot` network/timeout/non-2xx/`ok=false`/malformed JSON/missing `message_id` normalization
+- `answerCallbackQuery` callback id, non-2xx, malformed JSON, and `ok=false` handling
 
 ### Security-negative
 
@@ -65,7 +72,8 @@ Required for privileged/trust boundaries:
 - unauthorized editor id
 - stale state transition
 - duplicate publish race
-- secret redaction
+- duplicate dispatch race (single owner, single send)
+- secret redaction (bot token never in dispatch error text or persisted error codes)
 - oversized/unbounded provider/model input
 
 ### Web/component

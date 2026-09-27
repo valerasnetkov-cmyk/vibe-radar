@@ -3,6 +3,10 @@ export {
   publicationEvents,
   publicationEventTypeEnum,
 } from "@/server/db/schema/publication-analytics";
+export {
+  dispatchStatusEnum,
+  editorialReviewDispatches,
+} from "@/server/db/schema/editorial-dispatch";
 import {
   bigint,
   boolean,

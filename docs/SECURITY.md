@@ -37,10 +37,14 @@ Controls:
 - Validate callback schema and candidate/publication state.
 - Reject stale/invalid transitions.
 - Record actor, action, target, time, and result without secrets.
+- Resolve Telegram dispatch settings through `requireTelegramEditorConfig`, which fails closed (bot token, editor chat, non-empty editor allow-list, `TELEGRAM_API_TIMEOUT_MS`); unrelated commands never require Telegram settings.
+- Normalize all `EditorBot` provider failures (network, timeout, non-2xx, malformed JSON, `ok=false`, missing `message_id`) to safe codes; error text never contains the bot token or token-bearing URLs, and raw exception text is never persisted.
 
 ## 5. Publication idempotency
 
 Use a unique database constraint and transaction boundary so concurrency/retries cannot duplicate a one-time publication.
+
+The same guarantee covers review dispatch: `editorial_review_dispatches.candidate_id` is unique, so two concurrent claim attempts produce exactly one owner and one provider send; `SENT` dispatches never resend.
 
 Negative test: two concurrent publish attempts for the same idempotency key produce at most one provider post intent and one canonical successful publication record.
 

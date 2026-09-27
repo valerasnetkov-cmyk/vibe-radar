@@ -51,7 +51,17 @@ Actions:
 - `Watch`
 - `Reject`
 
-The current implementation validates callbacks in the server boundary, checks the configured editor allow-list independently, and applies the decision only from `CANDIDATE` or `REVIEW`. Each accepted transition creates an append-only editorial decision record. Telegram transport and card rendering are added in the next slice.
+The current implementation validates callbacks in the server boundary, checks the configured editor allow-list independently, and applies the decision only from `CANDIDATE` or `REVIEW`. Each accepted transition creates an append-only editorial decision record.
+
+## 3a. Review dispatch lifecycle (Stage 07)
+
+Candidate selection loads the latest score/confidence per project, reconstructs the persisted breakdown/evidence without manufacturing values, and skips rejected threshold decisions before any persistence. Candidates are created with `getOrCreateCandidate` on the canonical `dedupe_key` (`INSERT ... ON CONFLICT DO NOTHING` + lookup; never a synthetic ID).
+
+Dispatch is claimed atomically in `editorial_review_dispatches` (`UNIQUE(candidate_id)`): only the claim owner calls Telegram. `SENT` dispatches never resend; a `PENDING` row owned by another worker is not sent concurrently; `FAILED` rows retry within a bounded attempt budget. On provider success the `providerMessageId` is persisted and the candidate moves to `REVIEW` afterwards; on failure the dispatch records a safe error code and the candidate stays `CANDIDATE`.
+
+Editor cards are projected only from persisted data (project name, provider URL, validated analysis summary, persisted score/confidence) via `renderEditorCard`, so HTML escaping is preserved and nothing is fabricated. Missing content produces a deterministic skip reason instead of a dispatch.
+
+External-delivery timeout ambiguity: a Telegram timeout after the provider accepted the message can leave delivery state unknown. The lifecycle therefore claims at-most-once send attempts per claim owner with bounded retries, and never claims exactly-once delivery across the external Telegram boundary.
 
 ## 4. Authorization
 
