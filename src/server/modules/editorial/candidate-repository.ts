@@ -23,7 +23,7 @@ export async function getOrCreateCandidate(
   dedupeKey: string,
   expiresAt?: Date,
 ): Promise<GetOrCreateCandidateResult> {
-  // Try to find existing candidate first
+  // a. Fast path: reuse the existing row when another worker won earlier.
   const [existing] = await database
     .select({ id: candidates.id })
     .from(candidates)
@@ -34,8 +34,9 @@ export async function getOrCreateCandidate(
     return { candidateId: existing.id, created: false };
   }
 
-  // Create new candidate with real UUID foreign keys
-  const [newlyCreated] = await database
+  // b. Insert with real UUID foreign keys; concurrent workers race here and
+  // only one INSERT returns a row thanks to ON CONFLICT DO NOTHING.
+  const [inserted] = await database
     .insert(candidates)
     .values({
       projectId,
@@ -48,20 +49,24 @@ export async function getOrCreateCandidate(
     .onConflictDoNothing({ target: candidates.dedupeKey })
     .returning({ id: candidates.id });
 
-  if (newlyCreated) {
-    // Second lookup to get the actual candidate after potential conflict.
-    // newlyCreated is only defined when this worker performed the insert.
-    const [lookup] = await database
-      .select({ id: candidates.id })
-      .from(candidates)
-      .where(eq(candidates.dedupeKey, dedupeKey))
-      .limit(1);
-
-    if (lookup?.id) {
-      return { candidateId: lookup.id, created: true };
-    }
+  // c. This worker won the race: return the inserted id directly.
+  if (inserted && inserted.id) {
+    return { candidateId: inserted.id, created: true };
   }
 
-  // If we get here, neither insert nor lookup returned a valid row
+  // d. Lost the race: re-read the row the winning worker inserted.
+  const [reread] = await database
+    .select({ id: candidates.id })
+    .from(candidates)
+    .where(eq(candidates.dedupeKey, dedupeKey))
+    .limit(1);
+
+  // e. Return the winner's row.
+  if (reread && reread.id) {
+    return { candidateId: reread.id, created: false };
+  }
+
+  // f. Neither insert nor lookup produced a row: fail loudly.
+  // Never generate an artificial candidate ID.
   throw new Error(`Cannot create or find candidate with dedupeKey=${dedupeKey}`);
 }

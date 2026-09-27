@@ -335,6 +335,56 @@ maybe("Stage 07 editorial dispatch lifecycle", () => {
     expect(send).toHaveBeenCalledTimes(1);
   });
 
+  it("claims FAILED retries atomically so two workers produce one send", async () => {
+    const database = getDatabase();
+    const { projectId, scoreId } = await createProjectWithScore();
+    const { candidateId } = await getOrCreateCandidate(
+      database,
+      projectId,
+      scoreId,
+      "reason-retry-race",
+      uniqueKey("dedupe"),
+    );
+    createdCandidateIds.push(candidateId);
+    await database.insert(editorialReviewDispatches).values({
+      candidateId,
+      status: "FAILED",
+      attemptCount: 1,
+      lastErrorCode: "TELEGRAM_SEND_TIMEOUT",
+    });
+    const card = { text: "hi", inlineKeyboard: [] };
+    const send = vi.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return { providerMessageId: "mid-retry" };
+    });
+    const bot = { sendReviewCard: send };
+    const [first, second] = await Promise.all([
+      dispatchCandidateForReviewService(database, candidateId, card, bot),
+      dispatchCandidateForReviewService(database, candidateId, card, bot),
+    ]);
+    const outcomes = [first.outcome, second.outcome].sort();
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(outcomes).toEqual(["busy", "sent"]);
+  });
+
+  it("returns the same row from concurrent getOrCreateCandidate calls", async () => {
+    const database = getDatabase();
+    const { projectId, scoreId } = await createProjectWithScore();
+    const dedupeKey = uniqueKey("dedupe-race");
+    const [first, second] = await Promise.all([
+      getOrCreateCandidate(database, projectId, scoreId, "reason-race", dedupeKey),
+      getOrCreateCandidate(database, projectId, scoreId, "reason-race", dedupeKey),
+    ]);
+    createdCandidateIds.push(first.candidateId);
+    expect(first.candidateId).toBe(second.candidateId);
+    const rows = await database
+      .select({ id: candidates.id })
+      .from(candidates)
+      .where(eq(candidates.dedupeKey, dedupeKey));
+    expect(rows.length).toBe(1);
+    expect(rows[0]?.id).toBe(first.candidateId);
+  });
+
   it("leaves CANDIDATE on failed sends with a safe error code", async () => {
     const database = getDatabase();
     const { projectId, scoreId } = await createProjectWithScore();

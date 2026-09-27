@@ -57,11 +57,13 @@ The current implementation validates callbacks in the server boundary, checks th
 
 Candidate selection loads the latest score/confidence per project, reconstructs the persisted breakdown/evidence without manufacturing values, and skips rejected threshold decisions before any persistence. Candidates are created with `getOrCreateCandidate` on the canonical `dedupe_key` (`INSERT ... ON CONFLICT DO NOTHING` + lookup; never a synthetic ID).
 
-Dispatch is claimed atomically in `editorial_review_dispatches` (`UNIQUE(candidate_id)`): only the claim owner calls Telegram. `SENT` dispatches never resend; a `PENDING` row owned by another worker is not sent concurrently; `FAILED` rows retry within a bounded attempt budget. On provider success the `providerMessageId` is persisted and the candidate moves to `REVIEW` afterwards; on failure the dispatch records a safe error code and the candidate stays `CANDIDATE`.
+Dispatch is claimed atomically in `editorial_review_dispatches` (`UNIQUE(candidate_id)`): only the claim owner calls Telegram. `SENT` dispatches never resend; a `PENDING` row owned by another worker is not sent concurrently. `FAILED` rows retry only through an atomic conditional re-claim (`UPDATE ... WHERE status='FAILED' AND attempt_count=? RETURNING`) within a bounded attempt budget, so two workers racing a retry still produce a single send. On provider success the `providerMessageId` is persisted and the candidate moves to `REVIEW` afterwards in one transaction; on send failure the dispatch records a safe error code and the candidate stays `CANDIDATE`.
+
+Provider send errors and post-delivery DB finalization errors are strictly separated. If finalization fails after confirmed Telegram delivery, the dispatch is NOT marked `FAILED`, is NOT classified as a provider error, and does NOT resend automatically; it keeps a `FINALIZATION_FAILED` reconciliation marker and stays non-retriable until reconciled, because the provider side effect may already exist.
 
 Editor cards are projected only from persisted data (project name, provider URL, validated analysis summary, persisted score/confidence) via `renderEditorCard`, so HTML escaping is preserved and nothing is fabricated. Missing content produces a deterministic skip reason instead of a dispatch.
 
-External-delivery timeout ambiguity: a Telegram timeout after the provider accepted the message can leave delivery state unknown. The lifecycle therefore claims at-most-once send attempts per claim owner with bounded retries, and never claims exactly-once delivery across the external Telegram boundary.
+External-delivery timeout ambiguity: a Telegram timeout after the provider accepted the message can leave delivery state unknown. The lifecycle therefore claims at-most-once send attempts per claim owner with bounded retries, and never claims exactly-once delivery across the external Telegram boundary. Candidate creation follows the same discipline: concurrent `getOrCreateCandidate` calls on one `dedupe_key` return the same row (exactly one insert wins; losers re-read), and no artificial IDs are ever generated.
 
 ## 4. Authorization
 

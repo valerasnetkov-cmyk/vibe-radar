@@ -39,7 +39,10 @@ Cover:
 - candidate dedupe
 - publication idempotency
 - `editorial_review_dispatches` claim uniqueness and single-owner concurrency
+- atomic `FAILED` retry re-claim with a single send under concurrency
+- concurrent `getOrCreateCandidate` calls returning the same row
 - success stores `providerMessageId` and moves candidate to `REVIEW`; failure keeps `CANDIDATE`
+- send success with DB finalization failure keeps the row out of `FAILED` and blocks resend
 - `SENT` dispatches never resend
 - latest analysis selected by `createdAt`
 - transactional state transitions

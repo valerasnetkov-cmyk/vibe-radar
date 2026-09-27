@@ -14,6 +14,9 @@ All notable durable changes to VibeRadar are documented here.
 - `requireTelegramEditorConfig` fail-closed validation and `TELEGRAM_API_TIMEOUT_MS` propagation.
 - Stage 07 unit coverage (EditorBot provider matrix, card projection, breakdown/confidence reconstruction, config, error normalization) and PostgreSQL integration coverage for the dispatch lifecycle.
 - Documented external-delivery timeout ambiguity (at-most-once attempts, no exactly-once claim across Telegram).
+- Separated provider send failures from post-delivery DB finalization failures: finalization failures return `finalization_failed` with a reconciliation marker instead of `FAILED`, and never resend automatically.
+- Atomic `FAILED` retry re-claim (`UPDATE ... WHERE status='FAILED' AND attempt_count=? RETURNING`) so concurrent retries still produce a single send.
+- Race-safe `getOrCreateCandidate` (insert winner returns its id directly; losers re-read; concurrent callers receive the same row).
 
 ## 2026-09-17
 

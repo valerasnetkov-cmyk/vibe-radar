@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDatabase } from "@/server/db/client";
 import { candidates, editorialReviewDispatches } from "@/server/db/schema";
 import type { EditorCard } from "@/server/modules/telegram/editor-card";
@@ -26,7 +26,8 @@ export type DispatchOutcome =
   | { outcome: "already_sent" }
   | { outcome: "busy" }
   | { outcome: "failed"; errorCode: string }
-  | { outcome: "exhausted" };
+  | { outcome: "exhausted" }
+  | { outcome: "finalization_failed"; providerMessageId: string };
 
 /**
  * DB-backed idempotent dispatch claim.
@@ -35,7 +36,14 @@ export type DispatchOutcome =
  *   owner may call Telegram.
  * - SENT dispatches never send again (already_sent).
  * - A PENDING row owned by another worker is not sent concurrently (busy).
- * - FAILED rows retry atomically while attempts remain (bounded).
+ * - FAILED rows are retried only through an atomic conditional re-claim
+ *   (UPDATE ... WHERE status='FAILED' AND attempt_count=? RETURNING);
+ *   only the worker receiving the row owns the retry.
+ * - Provider send errors and post-delivery DB finalization errors are
+ *   strictly separated: a DB failure after confirmed Telegram delivery is
+ *   never classified as a provider error and never resends automatically.
+ *   The row keeps a reconciliation marker (`FINALIZATION_FAILED`) and stays
+ *   non-retriable until reconciled.
  * - Provider timeout ambiguity is documented: exactly-once delivery across
  *   the external Telegram boundary is not claimed.
  */
@@ -63,31 +71,38 @@ export async function dispatchCandidateForReviewService(
   if (!dispatchRecord) return { outcome: "busy" };
   if (dispatchRecord.status === "SENT") return { outcome: "already_sent" };
 
-  const attempts = dispatchRecord.attemptCount ?? 0;
-  if (dispatchRecord.status === "FAILED" && attempts >= MAX_DISPATCH_ATTEMPTS) {
-    return { outcome: "exhausted" };
-  }
-  if (dispatchRecord.status === "PENDING" && !freshClaim) {
-    return { outcome: "busy" };
+  let attempts = dispatchRecord.attemptCount ?? 0;
+  let ownsClaim = freshClaim !== null && freshClaim !== undefined;
+
+  if (dispatchRecord.status === "FAILED") {
+    if (attempts >= MAX_DISPATCH_ATTEMPTS) return { outcome: "exhausted" };
+    // Atomic retry claim: concurrent workers race this UPDATE, but only
+    // the worker receiving the row from RETURNING owns the retry.
+    const [claimed] = await database
+      .update(editorialReviewDispatches)
+      .set({ status: "PENDING", updatedAt: new Date() })
+      .where(
+        and(
+          eq(editorialReviewDispatches.candidateId, candidateId),
+          eq(editorialReviewDispatches.status, "FAILED"),
+          eq(editorialReviewDispatches.attemptCount, attempts),
+        ),
+      )
+      .returning();
+    if (!claimed) return { outcome: "busy" };
+    dispatchRecord = claimed;
+    attempts = claimed.attemptCount ?? attempts;
+    ownsClaim = true;
   }
 
+  if (!ownsClaim) return { outcome: "busy" };
+
+  // Provider boundary: ONLY send errors reach the catch below. Anything
+  // thrown by bot.sendReviewCard means delivery did not confirm.
+  let providerMessageId: string;
   try {
     const providerResult = await bot.sendReviewCard(card);
-    await database
-      .update(editorialReviewDispatches)
-      .set({
-        status: "SENT",
-        providerMessageId: providerResult.providerMessageId,
-        attemptCount: attempts + 1,
-        updatedAt: new Date(),
-        sentAt: new Date(),
-      })
-      .where(eq(editorialReviewDispatches.candidateId, candidateId));
-    await database
-      .update(candidates)
-      .set({ status: "REVIEW" })
-      .where(eq(candidates.id, candidateId));
-    return { outcome: "sent", providerMessageId: providerResult.providerMessageId };
+    providerMessageId = providerResult.providerMessageId;
   } catch (error) {
     const errorCode = normalizeTelegramError(error);
     await database
@@ -100,5 +115,37 @@ export async function dispatchCandidateForReviewService(
       })
       .where(eq(editorialReviewDispatches.candidateId, candidateId));
     return { outcome: "failed", errorCode };
+  }
+
+  // DB finalization AFTER confirmed provider delivery, in one transaction.
+  // A failure here must NOT be classified as a provider error and must NOT
+  // trigger an automatic resend: the provider side effect may already exist.
+  try {
+    await database.transaction(async (tx) => {
+      await tx
+        .update(editorialReviewDispatches)
+        .set({
+          status: "SENT",
+          providerMessageId,
+          attemptCount: attempts + 1,
+          updatedAt: new Date(),
+          sentAt: new Date(),
+        })
+        .where(eq(editorialReviewDispatches.candidateId, candidateId));
+      await tx.update(candidates).set({ status: "REVIEW" }).where(eq(candidates.id, candidateId));
+    });
+    return { outcome: "sent", providerMessageId };
+  } catch {
+    // Best-effort reconciliation marker; never masks the outcome and never
+    // changes the row to FAILED (which would wrongly re-arm retry).
+    try {
+      await database
+        .update(editorialReviewDispatches)
+        .set({ lastErrorCode: "FINALIZATION_FAILED", updatedAt: new Date() })
+        .where(eq(editorialReviewDispatches.candidateId, candidateId));
+    } catch {
+      // Database is known-unhealthy here; the outcome carries the signal.
+    }
+    return { outcome: "finalization_failed", providerMessageId };
   }
 }
