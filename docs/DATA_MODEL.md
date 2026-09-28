@@ -262,21 +262,29 @@ Fields:
 
 ## Opportunity
 
-Analytical product/implementation opportunity derived from evidence.
+Analytical product/implementation hypothesis derived from trusted evidence.
+A hypothesis is never an observed fact and stays visually separate from facts.
 
 Fields:
 
 - `id`
+- `canonical_key` (deterministic identity for concurrent-safe get-or-create)
 - `title`
 - `problem_statement`
+- `proposed_product`
 - `target_user`
-- `market_scope` (`RU`, `GLOBAL`, `RU_GLOBAL`)
-- `buildability_assessment_id`
-- `differentiation_hypothesis`
+- `market_scope` (`RU`, `GLOBAL`, `RU_GLOBAL`; hypothesis metadata, zero confidence weight)
+- `buildability_assessment_id` (server-derived conservative anchor, never caller input)
+- `buildability_label` (derived from that assessment)
+- `required_capabilities` (hypothesis metadata, no confidence weight)
+- `differentiation_hypothesis` (required prose, no confidence weight)
 - `risk_summary`
-- `opportunity_confidence`
+- `opportunity_confidence` (deterministic v1, capped at 90)
+- `policy_version`
 - `created_at`
-- `status`
+- `published_at` nullable
+- `updated_at`
+- `status` (`PROPOSED`, `REVIEWED`, `PUBLISHED`, `REJECTED`)
 
 ## OpportunityEvidence
 
@@ -285,9 +293,28 @@ Links an opportunity to the signals/trends/mechanics that justify it.
 Fields:
 
 - `opportunity_id`
-- subject type/id
-- rationale
-- evidence weight
+- subject type (`PROJECT`, `MECHANIC`; `SIGNAL`/`TREND` fail closed at runtime)
+- trusted subject id (resolved against published projects / eligible mechanics)
+- rationale (bounded hypothesis prose)
+- evidence weight (resolved backing source confidence, never caller input)
+- `evidence_key` (deterministic idempotency key)
+
+Unknown or unpublished references never become evidence rows.
+
+## OpportunityReview
+
+Append-only editor review, separate from project and mechanic reviews.
+
+Fields:
+
+- `id`
+- `opportunity_id`
+- `editor_actor_id`
+- `decision` (`APPROVE`, `REJECT`)
+- `note` nullable
+- `reviewed_at`
+
+Reviews never mutate confidence, buildability, evidence, keys, scope, or prose. The latest review decides approval; explicit publication flips eligible reviewed rows to `PUBLISHED`.
 
 ## Candidate
 

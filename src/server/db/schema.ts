@@ -21,6 +21,14 @@ export {
   mechanicStatusEnum,
   productMechanics,
 } from "@/server/db/schema/mechanics";
+export {
+  opportunities,
+  opportunityEvidence,
+  opportunityMarketScopeEnum,
+  opportunityReviewDecisionEnum,
+  opportunityReviews,
+  opportunityStatusEnum,
+} from "@/server/db/schema/opportunities";
 import {
   bigint,
   boolean,
@@ -65,18 +73,6 @@ export const jobRunStatusEnum = pgEnum("job_run_status", [
   "FAILED",
   "DEAD_LETTER",
 ]);
-export const opportunityMarketScopeEnum = pgEnum("opportunity_market_scope", [
-  "RU",
-  "GLOBAL",
-  "RU_GLOBAL",
-]);
-export const opportunityStatusEnum = pgEnum("opportunity_status", [
-  "PROPOSED",
-  "REVIEWED",
-  "PUBLISHED",
-  "REJECTED",
-]);
-
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
@@ -324,42 +320,6 @@ export const jobRuns = pgTable(
     finishedAt: timestamp("finished_at", { withTimezone: true }),
   },
   (table) => [index("job_runs_name_started_idx").on(table.jobName, table.startedAt)],
-);
-
-export const opportunities = pgTable(
-  "opportunities",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    title: text("title").notNull(),
-    problemStatement: text("problem_statement").notNull(),
-    proposedProduct: text("proposed_product").notNull(),
-    targetUser: text("target_user").notNull(),
-    marketScope: opportunityMarketScopeEnum("market_scope").notNull(),
-    buildabilityAssessmentId: uuid("buildability_assessment_id")
-      .notNull()
-      .references(() => buildabilityAssessments.id),
-    differentiationHypothesis: text("differentiation_hypothesis").notNull(),
-    riskSummary: jsonb("risk_summary").$type<string[]>().notNull(),
-    opportunityConfidence: integer("opportunity_confidence").notNull(),
-    status: opportunityStatusEnum("status").notNull().default("PROPOSED"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [index("opportunities_status_created_idx").on(table.status, table.createdAt)],
-);
-
-export const opportunityEvidence = pgTable(
-  "opportunity_evidence",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    opportunityId: uuid("opportunity_id")
-      .notNull()
-      .references(() => opportunities.id),
-    subjectType: text("subject_type").notNull(),
-    subjectId: text("subject_id").notNull(),
-    rationale: text("rationale").notNull(),
-    evidenceWeight: integer("evidence_weight").notNull(),
-  },
-  (table) => [index("opportunity_evidence_opportunity_idx").on(table.opportunityId)],
 );
 
 export const isEmptyJson = sql`'{}'::jsonb`;

@@ -21,7 +21,7 @@ export default async function MechanicsPage() {
         </a>
         <nav>
           <a href="/radar">Радар</a> · <a href="/mechanics">Механики</a> ·{" "}
-          <a href="/methodology">Методология</a>
+          <a href="/opportunities">Возможности</a> · <a href="/methodology">Методология</a>
         </nav>
       </header>
       <section className="intro">

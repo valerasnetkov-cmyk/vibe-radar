@@ -61,6 +61,15 @@ Cover:
 - review append-only behavior and latest-decision override
 - public eligibility matrix and projection allow-list
 - concurrent mechanic/evidence submission single-row outcomes
+- opportunity proposal strictness and 1-3 batch rejection
+- canonical opportunity/evidence key stability
+- trusted PROJECT/MECHANIC resolution with SIGNAL/TREND fail-closed
+- conservative buildability derivation with missing-data reasons
+- confidence cap, determinism, and zero prose/scope/approval weight
+- review append-only behavior with latest-decision override
+- explicit publish gating and PUBLISHED-without-approval exclusion
+- public opportunity projection allow-list and hypothesis inertness
+- concurrent opportunity/evidence submission single-row outcomes
 - latest analysis selected by `createdAt`
 - transactional state transitions
 - repository/query behavior used by critical flows

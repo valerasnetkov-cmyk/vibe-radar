@@ -125,6 +125,16 @@ Redact/forbid:
 - Public projections carry no editor identities, notes, internal keys, grouping internals, or raw source metadata; links are HTTP(S)-only.
 - Operator CLIs validate input and perform no fetching, importing, or shell execution from proposal content.
 
+## 8c. Opportunity integrity (Stage 11)
+
+- Proposals are untrusted: strict schema, bounded prose, no executable fields, no caller-set confidence/buildability/status/visibility.
+- Every confidence-bearing reference resolves to published projects or eligible mechanics; SIGNAL/TREND and unknown ids fail closed.
+- Canonical and evidence keys plus `ON CONFLICT DO NOTHING` make retries inflation-proof.
+- Buildability id and label always come from one persisted assessment and can never disagree.
+- Reviews are append-only and cannot alter metrics; explicit publication re-checks eligibility from PostgreSQL.
+- Public projections carry no editor ids, notes, evidence keys, raw payloads, assessment ids, or unsafe URLs; hypothesis prose stays inert data.
+- Operator CLIs validate input and perform no fetching, importing, or shell execution from proposal content.
+
 ## 9. Abuse/cost controls
 
 MVP has no anonymous public write surface, but background/provider cost can still be abused by bad inputs or logic errors.

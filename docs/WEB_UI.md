@@ -292,6 +292,15 @@ Unpublished mechanics resolve to an honest empty state and database failures
 to an error state without internals. Published project pages gain a related
 mechanics section only for evidence-linked eligible mechanics.
 
+## 15c. Stage 11 opportunities notes
+
+`/opportunities` renders only eligible reviewed publications, each labeled
+as a hypothesis with evidence kept visually separate from hypothesis prose.
+Cards show market scope, buildability, confidence, differentiation,
+capabilities, risks, and traceable sources. Unpublished rows resolve to an
+honest empty state and database failures to an error state without
+internals. Navigation gains `Возможности` alongside the working destinations.
+
 ## 16. Visual acceptance gate
 
 Before UI work is accepted, verify representative desktop and mobile views for:

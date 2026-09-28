@@ -2,7 +2,7 @@
 
 ## Current status
 
-Runtime implementation is in progress through the staged delivery plan below. Stages 07 (Telegram editorial dispatch), 08 (approved publishing and public read model), and 09 (durable worker operations) are closed; Stage 10 delivers the evidence-backed Product Mechanic Radar.
+Runtime implementation is in progress through the staged delivery plan below. Stages 07 (Telegram editorial dispatch), 08 (approved publishing and public read model), 09 (durable worker operations), and 10 (evidence-backed Product Mechanic Radar) are closed; Stage 11 delivers the evidence-linked Opportunity Engine.
 
 ## Stage 00 — Product/architecture bootstrap
 
@@ -177,13 +177,20 @@ Runtime implementation is in progress through the staged delivery plan below. St
 
 ## Stage 11 — Opportunity Engine
 
-- [ ] Signal/trend-to-opportunity input contract
-- [ ] 1-3 opportunity cap
-- [ ] market scope (`RU/GLOBAL`)
-- [ ] opportunity confidence
-- [ ] differentiation hypothesis
-- [ ] buildability reuse
-- [ ] public opportunity cards
+- [x] Signal/trend-to-opportunity input contract (runtime PROJECT/MECHANIC; SIGNAL/TREND fail closed and documented)
+- [x] 1-3 opportunity cap
+- [x] market scope (`RU/GLOBAL`)
+- [x] opportunity confidence
+- [x] differentiation hypothesis
+- [x] buildability reuse
+- [x] Untrusted proposal boundary (no caller confidence/buildability/status)
+- [x] Trusted source resolution with deterministic skips
+- [x] Canonical identity with concurrent-safe get-or-create
+- [x] Idempotent evidence links
+- [x] Append-only editor review separate from metrics
+- [x] Explicit publish transition with eligibility re-check
+- [x] Public eligibility gate with latest-review rule
+- [x] Public opportunity cards
 
 ## Experimental/reference integrations
 

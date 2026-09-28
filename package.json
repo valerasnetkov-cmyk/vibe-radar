@@ -22,7 +22,10 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "ops:replay": "tsx scripts/ops-replay.ts",
     "mechanics:propose": "tsx scripts/mechanics-propose.ts",
-    "mechanics:review": "tsx scripts/mechanics-review.ts"
+    "mechanics:review": "tsx scripts/mechanics-review.ts",
+    "opportunities:propose": "tsx scripts/opportunities-propose.ts",
+    "opportunities:review": "tsx scripts/opportunities-review.ts",
+    "opportunities:publish": "tsx scripts/opportunities-publish.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.5",

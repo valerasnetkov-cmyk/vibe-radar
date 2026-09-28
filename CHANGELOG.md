@@ -2,6 +2,19 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — Stage 11 evidence-linked opportunity engine
+
+### Added
+
+- Hypothesis-only proposal contract with a strict 1-3 batch limit.
+- Trusted source resolution for published projects and eligible mechanics with SIGNAL/TREND fail-closed.
+- Canonical opportunity identity with concurrent-safe get-or-create and idempotent evidence links.
+- Server-derived conservative buildability reuse with deterministic missing-data handling.
+- Deterministic v1 opportunity confidence capped at 90 with zero prose/scope/approval weight.
+- Append-only opportunity reviews plus propose/review/publish operator CLIs.
+- Explicit publish transition with eligibility re-check and an evidence-gated public read model.
+- Hypothesis-labeled `/opportunities` cards with evidence/hypothesis separation.
+
 ## Unreleased — Stage 10 evidence-backed product mechanic radar
 
 ### Added

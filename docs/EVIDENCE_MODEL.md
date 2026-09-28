@@ -200,6 +200,18 @@ independent when fork/mirror provenance is unavailable, so same-project
 observations merge conservatively while cross-repository lineage stays
 unresolved by lineage, not by assumption.
 
+## Opportunity evidence trust (Stage 11)
+
+Opportunity proposals are untrusted hypotheses and can never set confidence,
+buildability, or visibility. `PROJECT` sources resolve only to published
+Stage 08 snapshots; `MECHANIC` sources only to mechanics passing the full
+public eligibility gate. `SIGNAL`/`TREND` references fail closed because no
+canonical persisted trust boundary exists for them. Source confidence is the
+persisted project/mechanic confidence, buildability is the conservative
+aggregate of trusted source-project assessments, and duplicate subjects
+share one deterministic `evidence_key`. Opportunity confidence stays capped
+below factual certainty because a hypothesis is not an observed fact.
+
 ## Reproducibility
 
 For every high-value candidate analysis, preserve enough metadata to answer later:

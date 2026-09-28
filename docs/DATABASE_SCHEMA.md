@@ -270,6 +270,18 @@ Migration `0011_publication_snapshot` adds the three columns as nullable/with-de
 - `mechanic_reviews`: `id`, `mechanic_id` FK, `editor_actor_id`, `decision`, `note` nullable, `reviewed_at`; index on (`mechanic_id`, `reviewed_at`).
 - Migration 0008 stays unchanged.
 
+### opportunity review and Stage 11 keys (migration 0014)
+
+- `opportunities.canonical_key` nullable text with unique index (mandatory at application level for new rows).
+- `opportunities.policy_version` integer, default 1.
+- `opportunities.buildability_label` nullable (always set for new rows; derived server-side).
+- `opportunities.required_capabilities` nullable JSONB.
+- `opportunities.published_at` nullable; `opportunities.updated_at` with default now.
+- `opportunity_evidence.evidence_key` nullable text with unique index (mandatory for new rows).
+- `opportunity_review_decision` enum (`APPROVE`, `REJECT`).
+- `opportunity_reviews`: `id`, `opportunity_id` FK, `editor_actor_id`, `decision`, `note` nullable, `reviewed_at`; index on (`opportunity_id`, `reviewed_at`).
+- Migration 0009 stays unchanged; opportunity review is separate from editorial, mechanic, and publication domains.
+
 ### publication_attempts
 
 Core fields:
