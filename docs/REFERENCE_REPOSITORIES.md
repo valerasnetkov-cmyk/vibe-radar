@@ -8,7 +8,9 @@ The rule is:
 
 > learn from external projects early, depend on them only after a measured need.
 
-External projects are references or optional adapters. PostgreSQL and VibeRadar application logic remain the system of record.\n\nFast-moving weekly research is tracked in `TECHNOLOGY_RADAR.md`; this file remains the canonical adoption register.
+External projects are references or optional adapters. PostgreSQL and VibeRadar application logic remain the system of record.
+
+Fast-moving weekly research is tracked in `TECHNOLOGY_RADAR.md`; this file remains the canonical adoption register.
 
 ## Status vocabulary
 
@@ -33,6 +35,28 @@ Adopt now:
 - separation between run history and conclusions.
 
 VibeRadar implements its own `ResearchRun -> Claim -> EvidenceItem -> Verification` model. OpenResearch is not a production dependency.
+
+### vectorize-io/hindsight
+
+Repository: https://github.com/vectorize-io/hindsight
+
+Status: `PILOT_LATER`
+
+Relevant patterns:
+
+- evidence-backed observations and evolving knowledge;
+- temporal/graph/semantic retrieval;
+- separation between raw memory and derived conclusions.
+
+Potential role: research-memory experiment for weekly synthesis, follow-up research and longitudinal project understanding.
+
+Hard boundaries:
+
+- VIBE SCORE, confidence, evidence state and publication remain native VibeRadar records;
+- Hindsight output cannot upgrade claim verification or editorial approval;
+- benchmark against native PostgreSQL ResearchRun/Claim/Evidence history before adoption.
+
+Pilot trigger: Stage 09 weekly radar is stable enough to compare recall quality, unsupported-claim rate, editorial time and operating cost.
 
 ### NousResearch/hermes-agent
 
