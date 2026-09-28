@@ -2,6 +2,18 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — Stage 10 evidence-backed product mechanic radar
+
+### Added
+
+- Hardened mechanic proposal contract rejecting caller independence, lifecycle, metrics, and visibility.
+- Server-side evidence resolution with deterministic skips and trusted observation timestamps.
+- Canonical mechanic keys with concurrent-safe get-or-create and idempotent evidence append.
+- Deterministic v1 velocity, confidence, and lifecycle policy with maturity-gated ESTABLISHED and monotonic stages.
+- Append-only mechanic reviews plus operator propose/review CLIs.
+- Evidence-gated public eligibility with latest-review override and a traceable `/mechanics` read model.
+- Related-mechanics section on published project pages and Механики navigation.
+
 ## Unreleased — Stage 09 durable worker operations and scheduling
 
 ### Added

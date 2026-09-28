@@ -14,6 +14,7 @@ export type PublishedRadarEntry = {
 };
 
 export type PublishedProject = {
+  projectId: string;
   name: string;
   slug: string;
   candidateId: string;
@@ -97,11 +98,12 @@ export async function getPublishedProject(
     .orderBy(desc(publications.publishedAt))
     .limit(1);
   if (!publication) return null;
-  return toPublishedProject(publication, project.name, project.slug);
+  return toPublishedProject(publication, project.id, project.name, project.slug);
 }
 
 function toPublishedProject(
   publication: { candidateId: string; contentPayload: unknown; publishedAt: Date | null },
+  projectId: string,
   name: string,
   slug: string,
 ): PublishedProject | null {
@@ -110,6 +112,7 @@ function toPublishedProject(
   const content = parsed.data;
   if (content.projectSlug !== slug) return null;
   return {
+    projectId,
     name,
     slug,
     candidateId: publication.candidateId,

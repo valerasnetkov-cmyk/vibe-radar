@@ -259,6 +259,17 @@ Constraint:
 
 Migration `0011_publication_snapshot` adds the three columns as nullable/with-defaults so existing rows stay valid. `editorial_review_dispatches` (Stage 07) remains a separate table and is never reused for publication state.
 
+### mechanic review and Stage 10 evidence keys (migration 0013)
+
+- `product_mechanics.canonical_key` nullable text with unique index (backfilled from names; required for all new rows).
+- `product_mechanics.policy_version` integer, default 1.
+- `mechanic_evidence.evidence_key` nullable text with unique index (required for all new rows).
+- `mechanic_evidence.observed_at` nullable timestamp from trusted sources.
+- `mechanic_evidence.independence_basis` nullable text (`project` counted, `unresolved` never counted).
+- `mechanic_review_decision` enum (`APPROVE`, `REJECT`).
+- `mechanic_reviews`: `id`, `mechanic_id` FK, `editor_actor_id`, `decision`, `note` nullable, `reviewed_at`; index on (`mechanic_id`, `reviewed_at`).
+- Migration 0008 stays unchanged.
+
 ### publication_attempts
 
 Core fields:

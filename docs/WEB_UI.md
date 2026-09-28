@@ -283,6 +283,15 @@ error state without leaking internals. Evidence beyond the canonical
 project/source link is deferred until richer claim/evidence records are
 connected to published candidates.
 
+## 15b. Stage 10 mechanics notes
+
+`/mechanics` renders only eligible reviewed mechanics from the trusted read
+model, with stage, metrics, independent counts, categories, last-observed
+dates, bounded project traceability, and optional implications/risks.
+Unpublished mechanics resolve to an honest empty state and database failures
+to an error state without internals. Published project pages gain a related
+mechanics section only for evidence-linked eligible mechanics.
+
 ## 16. Visual acceptance gate
 
 Before UI work is accepted, verify representative desktop and mobile views for:

@@ -20,7 +20,8 @@ export default async function RadarPage() {
           VibeRadar
         </a>
         <nav>
-          <a href="/radar">Радар</a> · <a href="/methodology">Методология</a>
+          <a href="/radar">Радар</a> · <a href="/mechanics">Механики</a> ·{" "}
+          <a href="/methodology">Методология</a>
         </nav>
       </header>
       <section className="intro">

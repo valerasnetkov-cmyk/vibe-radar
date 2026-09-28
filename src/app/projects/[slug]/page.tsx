@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getPublicMechanicsForProject } from "@/server/modules/mechanics/public-read-model";
 import { getPublishedProject } from "@/server/modules/publishing/read-model";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   }
   if (!record) notFound();
   const { content } = record;
+  let relatedMechanics: Awaited<ReturnType<typeof getPublicMechanicsForProject>> = [];
+  try {
+    relatedMechanics = await getPublicMechanicsForProject(undefined, record.projectId);
+  } catch {
+    relatedMechanics = [];
+  }
   return (
     <main className="shell">
       <header className="header">
@@ -24,7 +31,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           VibeRadar
         </a>
         <nav>
-          <a href="/radar">Радар</a> · <a href="/methodology">Методология</a>
+          <a href="/radar">Радар</a> · <a href="/mechanics">Механики</a> ·{" "}
+          <a href="/methodology">Методология</a>
         </nav>
       </header>
       <section className="intro">
@@ -100,6 +108,18 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                 <a href={source.url} rel="noopener noreferrer">
                   {source.label}
                 </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {relatedMechanics.length > 0 && (
+        <section className="intro">
+          <p className="eyebrow">Связанные механики</p>
+          <ul>
+            {relatedMechanics.map((mechanic) => (
+              <li key={mechanic.id}>
+                <a href="/mechanics">{mechanic.name}</a> · {mechanic.stage}
               </li>
             ))}
           </ul>

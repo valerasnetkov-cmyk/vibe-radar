@@ -20,7 +20,9 @@
     "check:lines": "tsx scripts/check-lines.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
-    "ops:replay": "tsx scripts/ops-replay.ts"
+    "ops:replay": "tsx scripts/ops-replay.ts",
+    "mechanics:propose": "tsx scripts/mechanics-propose.ts",
+    "mechanics:review": "tsx scripts/mechanics-review.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.5",

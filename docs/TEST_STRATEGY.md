@@ -54,6 +54,13 @@ Cover:
 - digest period identity and per-period idempotency over published content
 - reconciliation visibility without provider side effects
 - registry rejection of unknown job names and secret-free error codes
+- mechanic proposal strictness and caller-field rejection
+- canonical key normalization and evidence key stability
+- velocity/confidence/lifecycle boundaries including ESTABLISHED maturity
+- unresolved-evidence exclusion and duplicate-evidence neutrality
+- review append-only behavior and latest-decision override
+- public eligibility matrix and projection allow-list
+- concurrent mechanic/evidence submission single-row outcomes
 - latest analysis selected by `createdAt`
 - transactional state transitions
 - repository/query behavior used by critical flows

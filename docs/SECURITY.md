@@ -115,6 +115,16 @@ Redact/forbid:
 - Manual replay invokes canonical handlers, preserving publication approval, idempotency, dispatch idempotency, budgets, and candidate rules.
 - Reconciliation visibility exposes internal ids and timestamps only.
 
+## 8b. Mechanic radar integrity (Stage 10)
+
+- Proposals are untrusted: strict schema, no executable fields, no caller-set stage/velocity/confidence/visibility/independence.
+- Every evidence reference resolves to persisted projects/source events; unknown or anchor-less references are skipped and never counted.
+- Independence is server-derived per canonical project; unresolved evidence never counts toward thresholds.
+- Deterministic evidence keys plus `ON CONFLICT DO NOTHING` make retries inflation-proof.
+- Reviews are append-only and cannot alter metrics; public visibility needs a latest `APPROVE` on top of the evidence gate.
+- Public projections carry no editor identities, notes, internal keys, grouping internals, or raw source metadata; links are HTTP(S)-only.
+- Operator CLIs validate input and perform no fetching, importing, or shell execution from proposal content.
+
 ## 9. Abuse/cost controls
 
 MVP has no anonymous public write surface, but background/provider cost can still be abused by bad inputs or logic errors.

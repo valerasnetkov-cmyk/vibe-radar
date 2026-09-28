@@ -81,4 +81,60 @@ A public mechanic card should normally require:
 
 Mechanic lifecycle and velocity are separate from repository VIBE SCORE. A high-score project may create an early mechanic signal, but cannot by itself establish a trend.
 
-The initial implementation validates bounded proposals, groups evidence by `independence_group`, and derives lifecycle/confidence deterministically. LLM/editor proposals can create evidence for review, but public mechanic cards remain deferred until traceability and threshold checks are connected to a public surface.
+Proposals are validated, evidence is resolved against persisted records, and public cards require the eligibility gate below.
+
+## Trust boundary (Stage 10)
+
+Proposals supply only names, prose, categories, and evidence references
+(project, source event, signal, bounded strength, rationale). Independence
+groups, lifecycle stage, velocity, confidence, public status, and approval
+are never accepted from proposal input. Unknown references are skipped
+deterministically; duplicate submissions share canonical and evidence keys
+and cannot inflate anything.
+
+## Velocity formula v1
+
+Over resolved independent groups with a 30-day recent window (`R` recent
+groups, `N` newly formed groups, `G` total groups):
+
+```text
+velocity = round(min(100, max(0, 40 * R/G + 60 * min(1, N/3))))
+```
+
+Zero groups score zero. Duplicate observations of one group add nothing.
+Stale-only evidence scores zero because nothing recent is expanding.
+
+## Confidence formula v1
+
+```text
+confidence = round(min(100, max(0,
+  30 * min(1, G/2) + 25 * min(1, G/5) + 15 * min(1, E/6)
+  + (R >= 1 ? 10 : 0) - min(20, U * 10))))
+```
+
+`E` counts resolved evidence rows, `U` counts unresolved/skipped rows. No
+VIBE SCORE, stars, marketing claims, OUTSCAN relevance, approval, or model
+prose enters the formula. Mechanic confidence is distinct from project
+confidence.
+
+## Lifecycle policy v1
+
+- `ESTABLISHED`: at least 5 independent groups observed over at least 90 days.
+- `BREAKOUT`: at least 5 independent groups with velocity at least 70.
+- `RISING`: at least 3 independent groups with at least 2 active recently.
+- `SPARK`: everything else.
+
+Low velocity alone never promotes to `ESTABLISHED`. Reassessment keeps the
+maximum of the current and computed stage, so lifecycle never regresses
+silently; corrections go through archive plus explicit review.
+
+## Review and public threshold
+
+Reviews are append-only `APPROVE`/`REJECT` records that never touch metrics.
+Public visibility additionally requires `ACTIVE` status, a latest `APPROVE`
+review, at least 2 independent groups, confidence at least 50, traceable
+HTTP(S) project sources, and valid name/description. A later `REJECT` hides
+the mechanic immediately. Operator CLIs (`mechanics:propose`,
+`mechanics:review`) are the only write path; no public review API exists and
+no automatic AI promotion is performed. Mechanics never affect VIBE SCORE,
+project confidence, candidate ranking, or project publication approval.

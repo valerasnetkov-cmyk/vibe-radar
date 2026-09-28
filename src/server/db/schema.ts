@@ -13,6 +13,14 @@ export {
   jobLeases,
   radarDigests,
 } from "@/server/db/schema/operations-state";
+export {
+  mechanicEvidence,
+  mechanicReviewDecisionEnum,
+  mechanicReviews,
+  mechanicStageEnum,
+  mechanicStatusEnum,
+  productMechanics,
+} from "@/server/db/schema/mechanics";
 import {
   bigint,
   boolean,
@@ -57,13 +65,6 @@ export const jobRunStatusEnum = pgEnum("job_run_status", [
   "FAILED",
   "DEAD_LETTER",
 ]);
-export const mechanicStageEnum = pgEnum("mechanic_stage", [
-  "SPARK",
-  "RISING",
-  "BREAKOUT",
-  "ESTABLISHED",
-]);
-export const mechanicStatusEnum = pgEnum("mechanic_status", ["ACTIVE", "ARCHIVED"]);
 export const opportunityMarketScopeEnum = pgEnum("opportunity_market_scope", [
   "RU",
   "GLOBAL",
@@ -323,37 +324,6 @@ export const jobRuns = pgTable(
     finishedAt: timestamp("finished_at", { withTimezone: true }),
   },
   (table) => [index("job_runs_name_started_idx").on(table.jobName, table.startedAt)],
-);
-
-export const productMechanics = pgTable("product_mechanics", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  canonicalName: text("canonical_name").notNull().unique(),
-  description: text("description").notNull(),
-  firstObservedAt: timestamp("first_observed_at", { withTimezone: true }).notNull(),
-  lastObservedAt: timestamp("last_observed_at", { withTimezone: true }).notNull(),
-  stage: mechanicStageEnum("stage").notNull(),
-  velocity: integer("velocity").notNull(),
-  confidence: integer("confidence").notNull(),
-  status: mechanicStatusEnum("status").notNull().default("ACTIVE"),
-  affectedCategories: jsonb("affected_categories").$type<string[]>().notNull(),
-  practicalImplications: jsonb("practical_implications").$type<string[]>().notNull(),
-  risks: jsonb("risks").$type<string[]>().notNull(),
-});
-
-export const mechanicEvidence = pgTable(
-  "mechanic_evidence",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    mechanicId: uuid("mechanic_id")
-      .notNull()
-      .references(() => productMechanics.id),
-    signalId: text("signal_id"),
-    projectId: uuid("project_id").references(() => projects.id),
-    sourceEventId: uuid("source_event_id").references(() => sourceEvents.id),
-    independenceGroup: text("independence_group").notNull(),
-    strength: integer("strength").notNull(),
-  },
-  (table) => [index("mechanic_evidence_mechanic_idx").on(table.mechanicId)],
 );
 
 export const opportunities = pgTable(

@@ -186,6 +186,20 @@ Treat these as potentially one origin:
 
 An `independence_group` lets confidence logic avoid double-counting repeated material.
 
+## Mechanic evidence trust (Stage 10)
+
+Mechanic proposals are untrusted input and can never declare independence.
+The server resolves every reference against persisted projects and source
+events, derives observation timestamps from retrieval/project times, and
+assigns groups by canonical project (`project:<id>`). References without a
+verifiable anchor, and source-event-only references without project linkage,
+are marked unresolved and excluded from independent-source counting.
+Duplicate evidence shares one deterministic `evidence_key` and cannot inflate
+metrics on retry. Known limitation: distinct repositories are not proven
+independent when fork/mirror provenance is unavailable, so same-project
+observations merge conservatively while cross-repository lineage stays
+unresolved by lineage, not by assumption.
+
 ## Reproducibility
 
 For every high-value candidate analysis, preserve enough metadata to answer later:

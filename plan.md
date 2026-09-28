@@ -2,7 +2,7 @@
 
 ## Current status
 
-Runtime implementation is in progress through the staged delivery plan below. Stage 07 delivers the idempotent Telegram editorial dispatch lifecycle.
+Runtime implementation is in progress through the staged delivery plan below. Stages 07 (Telegram editorial dispatch), 08 (approved publishing and public read model), and 09 (durable worker operations) are closed; Stage 10 delivers the evidence-backed Product Mechanic Radar.
 
 ## Stage 00 — Product/architecture bootstrap
 
@@ -162,12 +162,18 @@ Runtime implementation is in progress through the staged delivery plan below. St
 
 ## Stage 10 — Product Mechanic Radar
 
-- [ ] Mechanic extraction proposal schema
-- [ ] Independent-evidence grouping
-- [ ] Editor-assisted clustering
-- [ ] `SPARK / RISING / BREAKOUT / ESTABLISHED`
-- [ ] Mechanic confidence/velocity
-- [ ] Public mechanic cards
+- [x] Mechanic extraction proposal schema
+- [x] Untrusted proposal boundary (no caller independence/stage/metrics)
+- [x] Trusted evidence resolution against persisted records
+- [x] Independent-evidence grouping
+- [x] Canonical mechanic identity with concurrent-safe get-or-create
+- [x] Idempotent evidence append with deterministic keys
+- [x] Editor-assisted clustering
+- [x] `SPARK / RISING / BREAKOUT / ESTABLISHED`
+- [x] Mechanic confidence/velocity
+- [x] Append-only editor review separate from lifecycle
+- [x] Public eligibility gate with latest-review rule
+- [x] Public mechanic cards
 
 ## Stage 11 — Opportunity Engine
 

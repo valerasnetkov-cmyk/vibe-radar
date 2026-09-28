@@ -203,12 +203,13 @@ Fields:
 
 - `id`
 - `canonical_name`
+- `canonical_key` (normalized identity for concurrent-safe get-or-create)
 - `description`
-- `first_observed_at`
-- `last_observed_at`
-- `stage` (`SPARK`, `RISING`, `BREAKOUT`, `ESTABLISHED`)
-- `velocity`
-- `confidence`
+- `first_observed_at` / `last_observed_at` (derived from trusted evidence)
+- `stage` (`SPARK`, `RISING`, `BREAKOUT`, `ESTABLISHED`, deterministic v1 policy)
+- `velocity` (derived v1, 0..100)
+- `confidence` (derived v1, 0..100, distinct from project confidence)
+- `policy_version`
 - `status`
 
 ## ProductMechanicEvidence
@@ -221,10 +222,28 @@ Fields:
 - `signal_id`
 - `project_id` optional
 - `source_event_id` optional
-- `independence_group`
-- evidence strength
+- `independence_group` (server-derived, never proposal-supplied)
+- `independence_basis` (`project` counted, `unresolved` never counted)
+- `evidence_key` (deterministic idempotency key)
+- `observed_at` (trusted source timestamp, never proposal time)
+- evidence strength (bounded analyst metadata only)
 
 Independent implementations must be distinguishable from forks/copies of one origin.
+
+## MechanicReview
+
+Append-only editor review, separate from project editorial decisions.
+
+Fields:
+
+- `id`
+- `mechanic_id`
+- `editor_actor_id`
+- `decision` (`APPROVE`, `REJECT`)
+- `note` nullable
+- `reviewed_at`
+
+Reviews never mutate stage, velocity, confidence, or independence groups.
 
 ## Trend
 

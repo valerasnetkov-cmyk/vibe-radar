@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export const MECHANIC_POLICY_VERSION = 1;
+
+/**
+ * Untrusted proposal boundary. Accepts only references and prose needed to
+ * resolve persisted evidence. Lifecycle stage, velocity, confidence, public
+ * status, approval, independence grouping, and every derived count are
+ * server-computed and therefore absent here. Strict: unknown fields reject.
+ */
 export const mechanicProposalSchema = z
   .object({
     canonicalName: z.string().trim().min(3).max(160),
@@ -8,11 +16,11 @@ export const mechanicProposalSchema = z
       .array(
         z
           .object({
-            signalId: z.string().max(120).optional(),
+            signalId: z.string().trim().min(1).max(120).optional(),
             projectId: z.string().uuid().optional(),
             sourceEventId: z.string().uuid().optional(),
-            independenceGroup: z.string().trim().min(1).max(120),
-            strength: z.number().min(0).max(100),
+            strength: z.number().finite().min(0).max(100).optional(),
+            rationale: z.string().trim().min(1).max(500).optional(),
           })
           .strict(),
       )
@@ -25,6 +33,7 @@ export const mechanicProposalSchema = z
   .strict();
 
 export type MechanicProposal = z.infer<typeof mechanicProposalSchema>;
+export type MechanicEvidenceProposal = MechanicProposal["evidence"][number];
 export type MechanicStage = "SPARK" | "RISING" | "BREAKOUT" | "ESTABLISHED";
 
 export type MechanicAssessment = {
@@ -33,33 +42,9 @@ export type MechanicAssessment = {
   evidenceCount: number;
   confidence: number;
   velocity: number;
+  policyVersion: typeof MECHANIC_POLICY_VERSION;
 };
 
 export function validateMechanicProposal(value: unknown): MechanicProposal {
   return mechanicProposalSchema.parse(value);
-}
-
-export function assessMechanic(proposal: MechanicProposal, velocity: number): MechanicAssessment {
-  const independentGroups = new Set(proposal.evidence.map((item) => item.independenceGroup));
-  const independentSourceCount = independentGroups.size;
-  const boundedVelocity = Math.min(100, Math.max(0, Number.isFinite(velocity) ? velocity : 0));
-  const stage: MechanicStage =
-    independentSourceCount >= 5 && boundedVelocity < 30
-      ? "ESTABLISHED"
-      : independentSourceCount >= 5 && boundedVelocity >= 70
-        ? "BREAKOUT"
-        : independentSourceCount >= 3 && boundedVelocity >= 40
-          ? "RISING"
-          : "SPARK";
-  const confidence = Math.min(
-    100,
-    independentSourceCount * 20 + Math.min(20, proposal.evidence.length * 2),
-  );
-  return {
-    stage,
-    independentSourceCount,
-    evidenceCount: proposal.evidence.length,
-    confidence,
-    velocity: boundedVelocity,
-  };
 }
