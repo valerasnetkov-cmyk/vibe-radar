@@ -22,6 +22,7 @@ const environmentSchema = z.object({
     .min(60000)
     .max(86400000)
     .default(3600000),
+  PUBLICATION_INTERVAL_MS: z.coerce.number().int().min(60000).max(86400000).default(3600000),
   TELEGRAM_EDITOR_IDS: z.string().default(""),
   TELEGRAM_WEBHOOK_SECRET: optionalString(z.string().min(16)),
   TELEGRAM_BOT_TOKEN: optionalString(z.string().min(1)),
@@ -84,6 +85,28 @@ export function requireTelegramEditorConfig(config: RuntimeConfig): TelegramEdit
     throw new Error("Telegram editorial configuration is incomplete");
   }
   return { botToken, editorChatId, editorIds, timeoutMs };
+}
+
+export type TelegramPublishingConfig = {
+  botToken: string;
+  channelId: string;
+  timeoutMs: number;
+};
+
+/**
+ * Narrow runtime validator for the public Telegram publishing path only.
+ * The public channel is never the private editor chat. Fails closed when
+ * the publishing path is used; unrelated commands must not call this
+ * helper so they never require Telegram settings.
+ */
+export function requireTelegramPublishingConfig(config: RuntimeConfig): TelegramPublishingConfig {
+  const botToken = config.TELEGRAM_BOT_TOKEN;
+  const channelId = config.TELEGRAM_CHANNEL_ID;
+  const timeoutMs = config.TELEGRAM_API_TIMEOUT_MS;
+  if (!botToken || !channelId) {
+    throw new Error("Telegram publishing configuration is incomplete");
+  }
+  return { botToken, channelId, timeoutMs };
 }
 
 export function parseDiscoveryQueries(value: string, maximum = 10): string[] {

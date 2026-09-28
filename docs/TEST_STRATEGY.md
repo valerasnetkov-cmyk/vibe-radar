@@ -44,6 +44,11 @@ Cover:
 - success stores `providerMessageId` and moves candidate to `REVIEW`; failure keeps `CANDIDATE`
 - send success with DB finalization failure keeps the row out of `FAILED` and blocks resend
 - `SENT` dispatches never resend
+- approved publication with persisted `providerMessageId` and content snapshot
+- rejected/watching and foreign-decision publication refusal
+- single-owner concurrent first publication and failed-retry re-claim
+- finalization failure blocks automatic resend
+- public radar/project queries return only published validated snapshots
 - latest analysis selected by `createdAt`
 - transactional state transitions
 - repository/query behavior used by critical flows
@@ -64,6 +69,10 @@ Cover:
 - `EditorBot.sendReviewCard` chat id, HTML parse mode, inline keyboard, and provider message id
 - `EditorBot` network/timeout/non-2xx/`ok=false`/malformed JSON/missing `message_id` normalization
 - `answerCallbackQuery` callback id, non-2xx, malformed JSON, and `ok=false` handling
+- ContentModel builder reason matrix and contentVersion stability
+- Telegram HTML entity/tag-safe bounding and hostile-title escaping
+- `TelegramPublisher` channel, message id, and full provider-error matrix
+- public read-model filtering and XSS-negative projections
 
 ### Security-negative
 

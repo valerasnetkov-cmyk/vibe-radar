@@ -2,6 +2,18 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — Stage 08 approved publishing and public read model
+
+### Added
+
+- Server-side ContentModel builder for approved candidates with deterministic non-publishable reasons and a hash-based stable contentVersion.
+- Immutable publication content snapshots (`publications.content_payload`, migration `0011`) with attempt and error tracking.
+- Identity-based `publishApprovedCandidate` with PostgreSQL-derived approval binding, atomic first claim, atomic failed-retry re-claim, and provider/finalization failure separation.
+- Hardened `TelegramPublisher` provider boundary and public-channel config resolver.
+- Entity/tag-safe Telegram HTML bounding.
+- Publication worker job with channel-guarded scheduling and a published-only read model.
+- Real `/radar`, `/projects/[slug]`, and home pages rendering published snapshots with honest empty and not-found states.
+
 ## Unreleased — Stage 07 Telegram editorial dispatch
 
 ### Added

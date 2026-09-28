@@ -46,6 +46,24 @@ Use a unique database constraint and transaction boundary so concurrency/retries
 
 The same guarantee covers review dispatch: `editorial_review_dispatches.candidate_id` is unique, so two concurrent claim attempts produce exactly one owner and one provider send; `SENT` dispatches never resend.
 
+## 5a. Approved publication gate (Stage 08)
+
+Only `APPROVED` candidates with a same-candidate `APPROVE` decision publish;
+the service binds both from PostgreSQL, so a caller cannot combine candidate
+A with a decision from candidate B or inject content, HTML, or channel ids.
+Public Telegram traffic uses `requireTelegramPublishingConfig`
+(`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID`, `TELEGRAM_API_TIMEOUT_MS`) and
+never the editor chat. Post-delivery DB finalization failures surface as
+reconciliation-required and never resend automatically.
+
+## 5b. Public web exposure
+
+Public routes render only `published` snapshots validated against the
+ContentModel schema. Internal candidate states, editorial notes, editor
+identities, raw provider payloads, and secrets never reach public
+projections; invalid snapshots are skipped and non-HTTP(S) links are
+dropped before rendering.
+
 Negative test: two concurrent publish attempts for the same idempotency key produce at most one provider post intent and one canonical successful publication record.
 
 ## 6. Provider controls

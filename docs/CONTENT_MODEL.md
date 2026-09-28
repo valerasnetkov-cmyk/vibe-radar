@@ -55,3 +55,26 @@ OUTSCAN enrichment may only be added after editorial approval and feature-flag c
 `outscan_relevance` is contextual metadata, not a score component.
 
 The initial implementation renders the normalized model to escaped Telegram HTML and validates project links as HTTP(S) URLs. Publication remains behind deterministic approval and idempotency checks; channel renderers do not authorize publication.
+
+## 6. Stage 08 server-side builder
+
+`buildContentModelForApprovedCandidate(candidateId)` constructs the model
+exclusively from persisted, validated records (candidate, project, provider
+identity, score, confidence, latest valid SUCCEEDED analysis, latest
+buildability when present, latest APPROVE decision). No LLM is involved and
+no missing value is fabricated; gaps yield deterministic reasons
+(`not_approved`, `missing_approval_decision`, `missing_project`,
+`missing_provider_url`, `missing_score`, `missing_confidence`,
+`missing_analysis`, `invalid_analysis`).
+
+The model extends the concept above with `projectSlug`, `scoreVersion`,
+`confidenceLevel`, HTTP(S)-only `sources`, and optional `buildability`.
+Stage 08 format rule: first-time approved publications render as `FRESH`.
+
+## 7. contentVersion and immutable snapshot
+
+`contentVersion` is `sha256("content-schema:1|candidate:|analysis:|score:|score-version:|confidence-version:")`:
+stable across retries, changed by any canonical input change, with no time
+or randomness. The canonical model is persisted as `publications.content_payload`
+before the provider call; retries and the public web render from that
+immutable snapshot rather than rebuilding from mutable current state.

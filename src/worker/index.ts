@@ -3,6 +3,7 @@ import { JobScheduler } from "@/server/modules/operations/scheduler";
 import { runConfiguredGitHubDiscovery } from "@/worker/jobs/github-discovery";
 import { runConfiguredScoreCalculation } from "@/server/modules/scoring/job";
 import { runConfiguredCandidateSelection } from "@/server/modules/editorial/candidate-job";
+import { runConfiguredPublication } from "@/server/modules/publishing/job";
 
 let stopping = false;
 let scheduler: JobScheduler | undefined;
@@ -23,6 +24,12 @@ async function run(): Promise<void> {
     handler: runConfiguredCandidateSelection,
     intervalMs: config.CANDIDATE_SELECTION_INTERVAL_MS,
   });
+  if (config.TELEGRAM_CHANNEL_ID?.trim()) {
+    jobs.set("publication", {
+      handler: runConfiguredPublication,
+      intervalMs: config.PUBLICATION_INTERVAL_MS,
+    });
+  }
   scheduler = new JobScheduler(jobs, {
     pollIntervalMs: config.WORKER_POLL_INTERVAL_MS,
     maxAttempts: config.WORKER_MAX_JOB_ATTEMPTS,

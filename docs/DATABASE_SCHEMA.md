@@ -247,12 +247,17 @@ Core fields:
 - `idempotency_key`
 - `status`
 - `provider_message_id` nullable
+- `content_payload` nullable JSONB (immutable validated ContentModel snapshot; required for all new Stage 08 publications)
+- `attempt_count` integer, default 0
+- `last_error_code` nullable
 - `published_at` nullable
 - `created_at`
 
 Constraint:
 
 - unique `idempotency_key`
+
+Migration `0011_publication_snapshot` adds the three columns as nullable/with-defaults so existing rows stay valid. `editorial_review_dispatches` (Stage 07) remains a separate table and is never reused for publication state.
 
 ### publication_attempts
 

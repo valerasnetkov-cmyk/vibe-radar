@@ -126,13 +126,20 @@ Runtime implementation is in progress through the staged delivery plan below. St
 
 ## Stage 08 — Publishing + minimal web
 
-- [ ] Normalized ContentModel
-- [ ] Telegram renderer
-- [ ] Telegram publisher adapter
-- [ ] Publication idempotency key/constraint
-- [ ] Duplicate-publish regression tests
-- [ ] Minimal `viberadar.ru` radar/project pages
-- [ ] Evidence/source rendering
+- [x] Normalized ContentModel
+- [x] Server-side ContentModel builder from persisted approved records
+- [x] Immutable publication content snapshot (`content_payload`)
+- [x] Deterministic contentVersion (stable retries, hash of canonical inputs)
+- [x] Approval gate derived from PostgreSQL (APPROVED + same-candidate APPROVE)
+- [x] Telegram renderer
+- [x] Telegram publisher adapter
+- [x] Public channel config separated from editor chat
+- [x] Publication idempotency key/constraint
+- [x] Atomic first claim and failed-retry re-claim (single owner)
+- [x] Provider vs DB finalization boundary with reconciliation outcome
+- [x] Duplicate-publish regression tests
+- [x] Minimal `viberadar.ru` radar/project pages from published snapshots
+- [x] Evidence/source rendering (canonical HTTP(S) sources; richer evidence deferred)
 
 ## Stage 09 — Scheduler/operations
 

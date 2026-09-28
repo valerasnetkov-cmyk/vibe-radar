@@ -274,6 +274,15 @@ Do not ship:
 - placeholder VIBE scores presented as live;
 - AI-generated logos/screenshots representing external projects without disclosure.
 
+## 15a. Stage 08 implementation notes
+
+Home, `/radar`, and `/projects/[slug]` are server-rendered from published
+ContentModel snapshots only. Unpublished projects resolve to `notFound()`;
+empty collections render honest empty states; database outages render an
+error state without leaking internals. Evidence beyond the canonical
+project/source link is deferred until richer claim/evidence records are
+connected to published candidates.
+
 ## 16. Visual acceptance gate
 
 Before UI work is accepted, verify representative desktop and mobile views for:

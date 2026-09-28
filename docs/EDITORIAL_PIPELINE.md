@@ -81,6 +81,24 @@ Publication must use a deterministic unique idempotency key, for example derived
 
 A duplicate callback or retry must return the existing publication outcome rather than post twice.
 
+## 5a. Approved publication lifecycle (Stage 08)
+
+Publication accepts identity only: `publishApprovedCandidate(candidateId)`.
+The service derives approval from PostgreSQL (`candidate.status ===
+APPROVED` plus the latest APPROVE decision for that candidate); caller input
+can never authorize publication or supply content, HTML, channels, or a
+foreign decision. The destination is always the configured public channel,
+never the private editor chat.
+
+Idempotency is `candidate + channel + contentVersion`. The first claim
+(`INSERT ... ON CONFLICT DO NOTHING`) elects one owner; `published` rows
+never resend; foreign `pending` rows are busy; `failed` rows retry only
+through an atomic conditional re-claim republishing the persisted snapshot.
+Provider send and DB finalization are strictly separated with a
+`finalization_failed` reconciliation outcome that never resends
+automatically. Timeout ambiguity follows the Stage 07 policy: duplicate
+prevention wins over blind retry, and exactly-once delivery is not claimed.
+
 ## 6. Repeat coverage
 
 Avoid republishing the same project as if it were new within a configurable dedupe window, unless a new editorial event exists, such as:
