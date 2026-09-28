@@ -23,7 +23,20 @@ describe("operations runner", () => {
       },
       { maxAttempts: 2, retryDelayMs: 1 },
     );
-    expect(result).toEqual({ status: "DEAD_LETTER", attempts: 2, errorCode: "TypeError" });
+    expect(result).toEqual({ status: "DEAD_LETTER", attempts: 2, errorCode: "JOB_TRANSIENT" });
+  });
+
+  it("fails fast on non-retryable errors without exhausting attempts", async () => {
+    let calls = 0;
+    const result = await runBoundedJob(
+      async () => {
+        calls += 1;
+        throw new Error("Invalid server configuration");
+      },
+      { maxAttempts: 3, retryDelayMs: 1 },
+    );
+    expect(result).toEqual({ status: "FAILED", attempts: 1, errorCode: "CONFIG_INVALID" });
+    expect(calls).toBe(1);
   });
 
   it("does not overlap scheduler cycles and records operational metrics", async () => {

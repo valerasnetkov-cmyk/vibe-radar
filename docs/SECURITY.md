@@ -106,6 +106,15 @@ Redact/forbid:
 - database credentials;
 - full prompts/responses when they may contain sensitive content unless explicitly required and safely retained.
 
+## 8a. Operations security (Stage 09)
+
+- Singleton job ownership is decided by PostgreSQL leases; unexpired leases cannot be taken by a second worker.
+- Job names from the database resolve only through the allow-list registry; unknown names never execute handlers, imports, or commands, and no replay HTTP endpoint exists.
+- Persisted and logged error codes are allow-listed safe codes; raw messages, tokens, URLs, and provider payloads never persist.
+- The AI daily budget is enforced by an atomic database counter consumed before provider work; restarts cannot reset usage.
+- Manual replay invokes canonical handlers, preserving publication approval, idempotency, dispatch idempotency, budgets, and candidate rules.
+- Reconciliation visibility exposes internal ids and timestamps only.
+
 ## 9. Abuse/cost controls
 
 MVP has no anonymous public write surface, but background/provider cost can still be abused by bad inputs or logic errors.

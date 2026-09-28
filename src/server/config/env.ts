@@ -23,6 +23,9 @@ const environmentSchema = z.object({
     .max(86400000)
     .default(3600000),
   PUBLICATION_INTERVAL_MS: z.coerce.number().int().min(60000).max(86400000).default(3600000),
+  DAILY_RADAR_INTERVAL_MS: z.coerce.number().int().min(60000).max(86400000).default(86400000),
+  WEEKLY_RADAR_INTERVAL_MS: z.coerce.number().int().min(60000).max(604800000).default(604800000),
+  WORKER_JOB_LEASE_MS: z.coerce.number().int().min(60000).max(3600000).default(300000),
   TELEGRAM_EDITOR_IDS: z.string().default(""),
   TELEGRAM_WEBHOOK_SECRET: optionalString(z.string().min(16)),
   TELEGRAM_BOT_TOKEN: optionalString(z.string().min(1)),

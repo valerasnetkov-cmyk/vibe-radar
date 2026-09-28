@@ -19,7 +19,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "check:lines": "tsx scripts/check-lines.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx scripts/migrate.ts"
+    "db:migrate": "tsx scripts/migrate.ts",
+    "ops:replay": "tsx scripts/ops-replay.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.5",

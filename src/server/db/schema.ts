@@ -7,6 +7,12 @@ export {
   dispatchStatusEnum,
   editorialReviewDispatches,
 } from "@/server/db/schema/editorial-dispatch";
+export {
+  aiDailyUsage,
+  digestWindowEnum,
+  jobLeases,
+  radarDigests,
+} from "@/server/db/schema/operations-state";
 import {
   bigint,
   boolean,
@@ -312,6 +318,7 @@ export const jobRuns = pgTable(
     attemptCount: integer("attempt_count").notNull(),
     maxAttempts: integer("max_attempts").notNull(),
     errorCode: text("error_code"),
+    replayOfJobRunId: uuid("replay_of_job_run_id"),
     startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
     finishedAt: timestamp("finished_at", { withTimezone: true }),
   },

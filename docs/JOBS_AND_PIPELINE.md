@@ -137,6 +137,16 @@ Before horizontal worker scaling, add a PostgreSQL advisory lock or lease so onl
 
 Do not add Redis merely for scheduling.
 
+## 4a. Stage 09 singleton lease (implemented)
+
+Singleton ownership is decided by the `job_leases` table: `INSERT ...
+ON CONFLICT DO NOTHING` elects the first owner, and losers may only win a
+conditional `UPDATE ... WHERE locked_until < now()` after expiry, so crashed
+workers never leave permanent locks. Lease rows were preferred over advisory
+locks because pool connection/session lifetime is ambiguous under the
+current pg/Drizzle pooling model. Owner ids are random runtime identities,
+not credentials, and only allow-listed registry names can hold a lease.
+
 ## 5. Retry policy
 
 Every external call defines:
@@ -206,3 +216,15 @@ GitHub stage requires configurable:
 Operators must be able to replay a failed bounded job by stable internal identifier without bypassing idempotency or editorial authorization.
 
 Manual replay is an operational action, not a public endpoint.
+
+## 10a. Stage 09 replay and dead letter (implemented)
+
+`pnpm ops:replay -- <job-run-id>` loads the old run, resolves its job name
+through the allow-list registry (unknown names are rejected; no dynamic
+imports, commands, or module paths), and executes the canonical handler, so
+all domain idempotency and approval gates stay enforced. Every execution
+persists a `RUNNING` job run finished as `SUCCEEDED`, `FAILED`
+(terminal non-retryable failure), or `DEAD_LETTER` (bounded attempts
+exhausted) with a safe normalized code. Exhausted runs stay immutable; the
+next scheduled occurrence or a manual replay creates a NEW run, optionally
+linked via `replay_of_job_run_id`, and never overwrites history.

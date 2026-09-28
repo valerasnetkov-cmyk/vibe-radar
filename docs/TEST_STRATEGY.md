@@ -49,6 +49,11 @@ Cover:
 - single-owner concurrent first publication and failed-retry re-claim
 - finalization failure blocks automatic resend
 - public radar/project queries return only published validated snapshots
+- singleton lease single-owner/expiry semantics and job-run lifecycle persistence
+- atomic AI budget consumption caps, zero-limit blocking, and UTC rollover
+- digest period identity and per-period idempotency over published content
+- reconciliation visibility without provider side effects
+- registry rejection of unknown job names and secret-free error codes
 - latest analysis selected by `createdAt`
 - transactional state transitions
 - repository/query behavior used by critical flows

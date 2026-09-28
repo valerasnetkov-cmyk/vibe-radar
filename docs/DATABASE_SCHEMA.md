@@ -276,6 +276,13 @@ Constraint:
 
 - unique `(publication_id, attempt_number)`
 
+### Stage 09 operations state (migration 0012)
+
+- `job_leases`: `job_name` primary key, `owner_id`, `locked_until`, `updated_at`.
+- `ai_daily_usage`: `utc_day` date primary key, `used_count`, `updated_at`.
+- `radar_digests`: `id`, `window` (`digest_window` enum `DAILY`/`WEEKLY`), `period_key`, `generated_at`, `content_payload` nullable JSONB, `item_count`; unique `(window, period_key)`.
+- `job_runs.replay_of_job_run_id` nullable self-reference for manual replay linkage.
+
 ## 3. Deferred tables
 
 Do not create until the owning stage starts:

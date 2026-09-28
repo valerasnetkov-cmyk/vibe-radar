@@ -2,6 +2,18 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — Stage 09 durable worker operations and scheduling
+
+### Added
+
+- PostgreSQL singleton job leases with expiry recovery and a known-job allow-list registry.
+- Durable job-run lifecycle (RUNNING/SUCCEEDED/FAILED/DEAD_LETTER) wired into every scheduled execution.
+- Safe normalized operational error codes with retryable/terminal classification.
+- CLI-only manual replay (`pnpm ops:replay -- <job-run-id>`) creating linked new runs without touching history.
+- Atomic durable UTC AI daily budget consumed before provider work.
+- Durable operational summary, reconciliation visibility, and idempotent daily/weekly radar digests.
+- Real delivered-only publication analytics wiring and bounded graceful shutdown.
+
 ## Unreleased — Stage 08 approved publishing and public read model
 
 ### Added

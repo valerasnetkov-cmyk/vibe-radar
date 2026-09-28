@@ -143,15 +143,22 @@ Runtime implementation is in progress through the staged delivery plan below. St
 
 ## Stage 09 — Scheduler/operations
 
-- [ ] Collection schedule
-- [ ] Score schedule
-- [ ] Candidate queue policy
-- [ ] AI daily budget
-- [ ] retries/dead-letter state
-- [ ] operational metrics
-- [ ] daily radar generation
-- [ ] weekly radar generation
-- [ ] basic publication analytics
+- [x] Collection schedule
+- [x] Score schedule
+- [x] Candidate queue policy
+- [x] Publication schedule (channel-guarded)
+- [x] PostgreSQL singleton lease with expiry recovery
+- [x] Durable job runs (RUNNING/SUCCEEDED/FAILED/DEAD_LETTER) with normalized safe codes
+- [x] Bounded retry classification (retryable vs terminal)
+- [x] Dead-letter immutability with new-run re-entry and replay linkage
+- [x] CLI-only safe manual replay through the job allow-list
+- [x] Durable atomic AI daily budget (UTC day, restart/cross-process safe)
+- [x] Durable operational metrics from observed rows
+- [x] Reconciliation visibility without automatic resend
+- [x] Daily radar generation (durable, idempotent per UTC period)
+- [x] Weekly radar generation (durable, idempotent per UTC period)
+- [x] Basic publication analytics (real DELIVERED events only)
+- [x] Bounded graceful shutdown with pool close
 
 ## Stage 10 — Product Mechanic Radar
 

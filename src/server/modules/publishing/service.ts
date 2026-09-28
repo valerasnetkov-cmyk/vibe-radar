@@ -8,6 +8,7 @@ import {
   type ContentBuildFailureReason,
 } from "@/server/modules/content/builder";
 import { contentModelSchema, type ContentModel } from "@/server/modules/content/model";
+import { recordPublicationEvent } from "@/server/modules/publishing/analytics";
 import { renderTelegramHtml } from "@/server/modules/telegram/renderer";
 import { TelegramPublisher, TelegramPublishError } from "@/server/modules/telegram/publisher";
 
@@ -174,6 +175,13 @@ export async function publishApprovedCandidate(
         })
         .where(eq(publications.id, publicationId));
     });
+    // Real provider-accepted event only; analytics failures never fail the
+    // publication itself. VIEWED/CLICKED are never synthesized here.
+    try {
+      await recordPublicationEvent(publicationId, "DELIVERED", "telegram", new Date(), database);
+    } catch {
+      // Best effort only.
+    }
     return { outcome: "published", providerMessageId };
   } catch {
     try {

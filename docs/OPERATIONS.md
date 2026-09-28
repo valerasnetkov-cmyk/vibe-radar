@@ -31,6 +31,9 @@ Later stage variables are added only when their integration exists:
 - Telegram bot token/editor ids
 - AI provider credentials/model
 - publish timezone/schedule
+- `PUBLICATION_INTERVAL_MS`
+- `DAILY_RADAR_INTERVAL_MS` / `WEEKLY_RADAR_INTERVAL_MS` (UTC digest cadence)
+- `WORKER_JOB_LEASE_MS` (singleton lease duration, bounds job runtime)
 
 `.env.example` contains names and safe example values only.
 
@@ -151,6 +154,22 @@ Product-quality metrics are separate from operational metrics.
 The initial implementation stores job lifecycle records in `job_runs`, caps attempts, records normalized error codes, and keeps scheduler execution in the worker process. The scheduler has no public listener and does not create work when no job handler is configured.
 
 Daily and weekly digest builders operate on persisted publication timestamps only. Publication analytics accepts normalized provider events; it does not infer views or clicks when a channel has not supplied them.
+
+Stage 09 wires this together durably: every scheduled execution claims a
+PostgreSQL singleton lease, persists a `RUNNING` job run finished as
+`SUCCEEDED`/`FAILED`/`DEAD_LETTER` with a normalized safe code, and releases
+the lease. The AI daily budget is an atomic PostgreSQL counter (`ai_daily_usage`)
+consumed before any provider call, so restarts and concurrent workers share
+one limit. Radar digests persist idempotently per UTC window/period
+(`radar_digests` with `UNIQUE(window, period_key)`). `getOperationalSummary`
+reads job runs, AI usage, publication states, editorial backlog, real
+`DELIVERED` events, and reconciliation visibility from observed rows only.
+Successful publications record a real `DELIVERED` event; `VIEWED`/`CLICKED`
+are never synthesized. Reconciliation rows (`FINALIZATION_FAILED`) are
+listed for operators and never auto-resent. Shutdown stops scheduling, waits
+a bounded grace period for the in-flight bounded operation, then closes the
+database pool. Operational logs are single JSON lines with an allow-listed
+field shape that cannot carry secrets.
 
 GitHub collection is opt-in through validated query and interval configuration. The worker registers no collection job when the query list is empty. AI candidate consumption is guarded by a UTC daily budget before a provider call is allowed.
 
