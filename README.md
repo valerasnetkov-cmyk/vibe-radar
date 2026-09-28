@@ -141,7 +141,7 @@ See `docs/OUTSCAN_INTEGRATION.md`.
 - `docs/GITHUB_DISCOVERY.md` - GitHub discovery rules
 - `docs/SOURCES_AND_TRUST.md` - evidence tiers and fact-check policy
 - `docs/EVIDENCE_MODEL.md` - ResearchRun, Claim, EvidenceItem and verification contract
-- `docs/REFERENCE_REPOSITORIES.md` - external repository patterns and adoption gates
+- `docs/REFERENCE_REPOSITORIES.md` - external repository patterns and adoption gates\n- `docs/TECHNOLOGY_RADAR.md` - weekly research priorities, pilots and external technology backlog
 - `docs/VIBE_SCORE.md` - score/velocity contract
 - `docs/AI_ANALYSIS.md` - AI trust boundary
 - `docs/CONTENT_MODEL.md` - normalized content model
