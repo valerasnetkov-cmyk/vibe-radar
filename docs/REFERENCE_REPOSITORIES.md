@@ -8,7 +8,7 @@ The rule is:
 
 > learn from external projects early, depend on them only after a measured need.
 
-External projects are references or optional adapters. PostgreSQL and VibeRadar application logic remain the system of record.
+External projects are references or optional adapters. PostgreSQL and VibeRadar application logic remain the system of record.\n\nFast-moving weekly research is tracked in `TECHNOLOGY_RADAR.md`; this file remains the canonical adoption register.
 
 ## Status vocabulary
 
