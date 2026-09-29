@@ -192,6 +192,14 @@ Runtime implementation is in progress through the staged delivery plan below. St
 - [x] Public eligibility gate with latest-review rule
 - [x] Public opportunity cards
 
+## Agent-native radar taxonomy
+
+- [x] Add canonical v1 track taxonomy for agent/web/platform signals
+- [x] Normalize common aliases without forcing unknown categories
+- [x] Keep track classification separate from VIBE SCORE and editorial priority
+- [ ] Wire canonical tracks into Product Mechanic Radar persistence/read models when the next mechanic schema change is scheduled
+- [ ] Add UI/watchlist filters only after persisted taxonomy usage exists
+
 ## Experimental/reference integrations
 
 These are not Stage 01 dependencies and must not become a second system of record.
