@@ -3,7 +3,7 @@ import { getDatabase } from "@/server/db/client";
 import { mechanicEvidence, productMechanics } from "@/server/db/schema";
 import { assessMechanic, maxStage } from "@/server/modules/mechanics/assessment";
 import type { MechanicProposal } from "@/server/modules/mechanics/contract";
-import { evidenceKeyFor, normalizeMechanicKey } from "@/server/modules/mechanics/identity";
+import { evidenceKeyFor, normalizeMechanicKey } from "@/server/modules/mechanics/identity";\nimport { normalizeRadarTracks, type RadarTrack } from "@/server/modules/mechanics/radar-tracks";
 import {
   resolveMechanicEvidence,
   type ResolvedMechanicEvidence,
@@ -185,7 +185,7 @@ export async function submitMechanicProposal(
     resolution.resolved.length > 0
       ? new Date(Math.min(...resolution.resolved.map((item) => item.observedAt.getTime())))
       : now;
-  const { mechanicId, created } = await getOrCreateMechanic(database, {
+  const radarTracks = normalizeRadarTracks(proposal.radarTracks ?? []);\n  const { mechanicId, created } = await getOrCreateMechanic(database, {
     canonicalKey,
     canonicalName: proposal.canonicalName.trim().slice(0, 160),
     description: proposal.description,
