@@ -3,7 +3,8 @@ import { getDatabase } from "@/server/db/client";
 import { mechanicEvidence, productMechanics } from "@/server/db/schema";
 import { assessMechanic, maxStage } from "@/server/modules/mechanics/assessment";
 import type { MechanicProposal } from "@/server/modules/mechanics/contract";
-import { evidenceKeyFor, normalizeMechanicKey } from "@/server/modules/mechanics/identity";\nimport { normalizeRadarTracks, type RadarTrack } from "@/server/modules/mechanics/radar-tracks";
+import { evidenceKeyFor, normalizeMechanicKey } from "@/server/modules/mechanics/identity";
+import { normalizeRadarTracks, type RadarTrack } from "@/server/modules/mechanics/radar-tracks";
 import {
   resolveMechanicEvidence,
   type ResolvedMechanicEvidence,
@@ -31,17 +32,27 @@ export async function getOrCreateMechanic(
     canonicalName: string;
     description: string;
     affectedCategories: string[];
+    radarTracks: RadarTrack[];
     practicalImplications: string[];
     risks: string[];
     observedAt: Date;
   },
 ): Promise<{ mechanicId: string; created: boolean }> {
   const [existing] = await database
-    .select({ id: productMechanics.id })
+    .select({ id: productMechanics.id, radarTracks: productMechanics.radarTracks })
     .from(productMechanics)
     .where(eq(productMechanics.canonicalKey, input.canonicalKey))
     .limit(1);
-  if (existing?.id) return { mechanicId: existing.id, created: false };
+  if (existing?.id) {
+    const mergedTracks = normalizeRadarTracks([...(existing.radarTracks ?? []), ...input.radarTracks]);
+    if (mergedTracks.join("|") !== (existing.radarTracks ?? []).join("|")) {
+      await database
+        .update(productMechanics)
+        .set({ radarTracks: mergedTracks })
+        .where(eq(productMechanics.id, existing.id));
+    }
+    return { mechanicId: existing.id, created: false };
+  }
 
   const [inserted] = await database
     .insert(productMechanics)
@@ -56,6 +67,7 @@ export async function getOrCreateMechanic(
       confidence: 0,
       status: "ACTIVE",
       affectedCategories: input.affectedCategories,
+      radarTracks: input.radarTracks,
       practicalImplications: input.practicalImplications,
       risks: input.risks,
     })
@@ -64,11 +76,20 @@ export async function getOrCreateMechanic(
   if (inserted?.id) return { mechanicId: inserted.id, created: true };
 
   const [reread] = await database
-    .select({ id: productMechanics.id })
+    .select({ id: productMechanics.id, radarTracks: productMechanics.radarTracks })
     .from(productMechanics)
     .where(eq(productMechanics.canonicalKey, input.canonicalKey))
     .limit(1);
-  if (reread?.id) return { mechanicId: reread.id, created: false };
+  if (reread?.id) {
+    const mergedTracks = normalizeRadarTracks([...(reread.radarTracks ?? []), ...input.radarTracks]);
+    if (mergedTracks.join("|") !== (reread.radarTracks ?? []).join("|")) {
+      await database
+        .update(productMechanics)
+        .set({ radarTracks: mergedTracks })
+        .where(eq(productMechanics.id, reread.id));
+    }
+    return { mechanicId: reread.id, created: false };
+  }
   throw new Error("Mechanic could not be created or found");
 }
 
@@ -185,11 +206,13 @@ export async function submitMechanicProposal(
     resolution.resolved.length > 0
       ? new Date(Math.min(...resolution.resolved.map((item) => item.observedAt.getTime())))
       : now;
-  const radarTracks = normalizeRadarTracks(proposal.radarTracks ?? []);\n  const { mechanicId, created } = await getOrCreateMechanic(database, {
+  const radarTracks = normalizeRadarTracks(proposal.radarTracks ?? []);
+  const { mechanicId, created } = await getOrCreateMechanic(database, {
     canonicalKey,
     canonicalName: proposal.canonicalName.trim().slice(0, 160),
     description: proposal.description,
     affectedCategories: proposal.affectedCategories,
+    radarTracks,
     practicalImplications: proposal.practicalImplications,
     risks: proposal.risks,
     observedAt: firstObserved,
