@@ -254,7 +254,7 @@ maybe("Stage 10 evidence-backed mechanic radar", () => {
     const card = visible.find((entry) => entry.id === result.mechanicId);
     expect(card?.independentSourceCount).toBe(2);
     expect(card?.sources).toHaveLength(2);
-    expect(card?.stage).toBe("SPARK");
+    expect(card?.stage).toBe("SPARK");\n    expect(card?.radarTracks).toEqual(["AGENT_INTERFACE", "AGENT_RUNTIME"]);
   });
 
   it("hides mechanics after a later REJECT", async () => {
