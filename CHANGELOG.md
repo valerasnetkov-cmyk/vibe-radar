@@ -2,6 +2,14 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — Agent-native radar taxonomy
+
+### Added
+
+- Canonical versioned radar tracks for agent interfaces, runtimes, security, testing, economy, truth/fact layers, AX, generative UI, small software, crypto/PQ, and major Web Platform signals.
+- Alias normalization with fail-closed unknown handling and deterministic unit coverage.
+- Product documentation keeping radar-track classification independent from VIBE SCORE, editorial approval, and publication priority.
+
 ## Unreleased — Stage 11 evidence-linked opportunity engine
 
 ### Added
