@@ -122,6 +122,7 @@ maybe("Stage 10 evidence-backed mechanic radar", () => {
       description: "A repeated confirmation interaction before risky actions.",
       evidence: refs.map((ref, index) => ({ ...ref, signalId: `sig-${index}`, strength: 70 })),
       affectedCategories: ["agents"],
+      radarTracks: ["MCP", "agent runtime", "unknown topic"],
       practicalImplications: ["Add explicit human control"],
       risks: ["May slow automation"],
     };
@@ -254,7 +255,8 @@ maybe("Stage 10 evidence-backed mechanic radar", () => {
     const card = visible.find((entry) => entry.id === result.mechanicId);
     expect(card?.independentSourceCount).toBe(2);
     expect(card?.sources).toHaveLength(2);
-    expect(card?.stage).toBe("SPARK");\n    expect(card?.radarTracks).toEqual(["AGENT_INTERFACE", "AGENT_RUNTIME"]);
+    expect(card?.stage).toBe("SPARK");
+    expect(card?.radarTracks).toEqual(["AGENT_INTERFACE", "AGENT_RUNTIME"]);
   });
 
   it("hides mechanics after a later REJECT", async () => {
