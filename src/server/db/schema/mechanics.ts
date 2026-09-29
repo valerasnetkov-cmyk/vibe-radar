@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { projects, sourceEvents } from "@/server/db/schema";
 
@@ -22,7 +23,12 @@ export const productMechanics = pgTable("product_mechanics", {
   confidence: integer("confidence").notNull(),
   policyVersion: integer("policy_version").notNull().default(1),
   status: mechanicStatusEnum("status").notNull().default("ACTIVE"),
-  affectedCategories: jsonb("affected_categories").$type<string[]>().notNull(),\n  radarTracks: text("radar_tracks").array().$type<string[]>().notNull().default([]),
+  affectedCategories: jsonb("affected_categories").$type<string[]>().notNull(),
+  radarTracks: text("radar_tracks")
+    .array()
+    .$type<string[]>()
+    .notNull()
+    .default(sql`ARRAY[]::text[]`),
   practicalImplications: jsonb("practical_implications").$type<string[]>().notNull(),
   risks: jsonb("risks").$type<string[]>().notNull(),
 });
