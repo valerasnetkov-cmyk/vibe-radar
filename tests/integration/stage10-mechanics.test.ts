@@ -243,6 +243,28 @@ maybe("Stage 10 evidence-backed mechanic radar", () => {
     expect(grown.assessment.stage).toBe("RISING");
   });
 
+  it("merges new radar tracks into an existing mechanic", async () => {
+    const database = getDatabase();
+    const first = await createProject("trackone");
+    const second = await createProject("tracktwo");
+    const name = `Track Merge ${Date.now()}`;
+    const initial = await submitMechanicProposal(database, {
+      ...proposalFor(name, [first]),
+      radarTracks: ["MCP"],
+    });
+    mechanicIds.push(initial.mechanicId);
+    await submitMechanicProposal(database, {
+      ...proposalFor(name, [second]),
+      radarTracks: ["PQC", "not-a-track"],
+    });
+    const [stored] = await database
+      .select({ radarTracks: productMechanics.radarTracks })
+      .from(productMechanics)
+      .where(eq(productMechanics.id, initial.mechanicId))
+      .limit(1);
+    expect(stored?.radarTracks).toEqual(["AGENT_INTERFACE", "CRYPTO_PQ"]);
+  });
+
   it("publishes approved mechanics that satisfy every threshold", async () => {
     const database = getDatabase();
     const first = await createProject("pubone");
