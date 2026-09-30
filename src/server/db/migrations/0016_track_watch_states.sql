@@ -1,3 +1,8 @@
+CREATE TABLE "track_watch_profiles" (
+  "profile_key" text PRIMARY KEY,
+  "initialized_at" timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE "track_watch_states" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "profile_key" text NOT NULL,
