@@ -12,6 +12,7 @@ export const KNOWN_JOB_NAMES = [
   "publication",
   "daily-radar",
   "weekly-radar",
+  "track-watch-alerts",
 ] as const;
 
 export type KnownJobName = (typeof KNOWN_JOB_NAMES)[number];

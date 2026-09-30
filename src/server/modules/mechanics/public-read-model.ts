@@ -29,6 +29,7 @@ export type PublicMechanic = {
   independentSourceCount: number;
   evidenceCount: number;
   categories: string[];
+  radarTracks: string[];
   practicalImplications: string[];
   risks: string[];
   lastObservedAt: string;
@@ -182,6 +183,7 @@ export async function listPublicMechanics(
       independentSourceCount: groups.size,
       evidenceCount: rows.length,
       categories: mechanic.affectedCategories,
+      radarTracks: mechanic.radarTracks,
       practicalImplications: mechanic.practicalImplications,
       risks: mechanic.risks,
       lastObservedAt: mechanic.lastObservedAt.toISOString(),

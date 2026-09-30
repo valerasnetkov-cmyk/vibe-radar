@@ -13,6 +13,7 @@ export {
   jobLeases,
   radarDigests,
 } from "@/server/db/schema/operations-state";
+export { trackWatchProfiles, trackWatchStates } from "@/server/db/schema/track-watch";
 export {
   mechanicEvidence,
   mechanicReviewDecisionEnum,

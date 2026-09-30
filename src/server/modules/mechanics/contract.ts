@@ -27,6 +27,7 @@ export const mechanicProposalSchema = z
       .min(1)
       .max(30),
     affectedCategories: z.array(z.string().trim().min(1).max(80)).max(10),
+    radarTracks: z.array(z.string().trim().min(1).max(80)).max(8).optional(),
     practicalImplications: z.array(z.string().trim().min(1).max(240)).max(5),
     risks: z.array(z.string().trim().min(1).max(240)).max(5),
   })

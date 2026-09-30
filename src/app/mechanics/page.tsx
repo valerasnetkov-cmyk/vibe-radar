@@ -1,18 +1,47 @@
 import { listPublicMechanics } from "@/server/modules/mechanics/public-read-model";
+import { normalizeRadarTrack, radarTrackSchema } from "@/server/modules/mechanics/radar-tracks";
 
 export const dynamic = "force-dynamic";
+
+const TRACK_LABELS: Record<string, string> = {
+  AGENT_INTERFACE: "Agent Interface",
+  AGENT_RUNTIME: "Agent Runtime",
+  AGENT_SECURITY: "Agent Security",
+  AGENT_TESTING: "Agent Testing",
+  AGENT_ECONOMY: "Agent Economy",
+  AGENT_TRUTH: "Agent Truth",
+  AGENT_EXPERIENCE: "Agent Experience",
+  GENERATIVE_UI: "Generative UI",
+  SMALL_SOFTWARE: "Small Software",
+  CRYPTO_PQ: "Crypto / PQ",
+  WEB_PLATFORM: "Web Platform",
+};
 
 function formatDate(value: string): string {
   return value.slice(0, 10);
 }
 
-export default async function MechanicsPage() {
+type MechanicsPageProps = {
+  searchParams?: Promise<{ track?: string | string[] }>;
+};
+
+export default async function MechanicsPage({ searchParams }: MechanicsPageProps) {
+  const params = await searchParams;
+  const rawTrack = Array.isArray(params?.track) ? params.track[0] : params?.track;
+  const selectedTrack = rawTrack ? normalizeRadarTrack(rawTrack) : null;
+
   let mechanics: Awaited<ReturnType<typeof listPublicMechanics>> | null = null;
   try {
     mechanics = await listPublicMechanics();
   } catch {
     mechanics = null;
   }
+
+  const visibleMechanics =
+    mechanics && selectedTrack
+      ? mechanics.filter((mechanic) => mechanic.radarTracks.includes(selectedTrack))
+      : mechanics;
+
   return (
     <main className="shell">
       <header className="header">
@@ -31,22 +60,46 @@ export default async function MechanicsPage() {
           Публичными становятся только механики с независимыми источниками, traceable evidence и
           проверенным lifecycle.
         </p>
+        <nav aria-label="Фильтр по технологическому треку">
+          <a href="/mechanics" aria-current={selectedTrack === null ? "page" : undefined}>
+            Все
+          </a>
+          {" · "}
+          {radarTrackSchema.options.map((track, index) => (
+            <span key={track}>
+              {index > 0 && " · "}
+              <a
+                href={`/mechanics?track=${encodeURIComponent(track)}`}
+                aria-current={selectedTrack === track ? "page" : undefined}
+              >
+                {TRACK_LABELS[track] ?? track}
+              </a>
+            </span>
+          ))}
+        </nav>
       </section>
       <section className="records" aria-live="polite">
-        {mechanics === null ? (
+        {visibleMechanics === null ? (
           <p className="muted">Данные временно недоступны.</p>
-        ) : mechanics.length === 0 ? (
+        ) : visibleMechanics.length === 0 ? (
           <p className="muted">
-            Публичных механик пока нет. Данные появятся после editor review и проверки независимых
-            evidence.
+            {selectedTrack
+              ? `В треке ${TRACK_LABELS[selectedTrack] ?? selectedTrack} пока нет публичных механик.`
+              : "Публичных механик пока нет. Данные появятся после editor review и проверки независимых evidence."}
           </p>
         ) : (
-          mechanics.map((mechanic) => (
+          visibleMechanics.map((mechanic) => (
             <article className="record" key={mechanic.id}>
               <div>
                 <p className="eyebrow">{mechanic.stage}</p>
                 <h2>{mechanic.name}</h2>
                 <p className="muted">{mechanic.description}</p>
+                {mechanic.radarTracks.length > 0 && (
+                  <p className="record-link">
+                    Треки:{" "}
+                    {mechanic.radarTracks.map((track) => TRACK_LABELS[track] ?? track).join(", ")}
+                  </p>
+                )}
                 <p className="record-link">
                   Независимых реализаций: {mechanic.independentSourceCount} · Наблюдений:{" "}
                   {mechanic.evidenceCount}
