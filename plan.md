@@ -204,6 +204,16 @@ Runtime implementation is in progress through the staged delivery plan below. St
 - [x] Alert only on new mechanics, stage changes, or material velocity/confidence changes
 - [ ] Add authenticated user-managed watchlists after the product has a user/account surface
 
+## External source discovery
+
+- [x] Add official Chrome Developers RSS adapter with fixed-host fetch boundary
+- [x] Persist Chrome posts as source events with payload hashes and bounded normalized metadata
+- [x] Add optional scheduled Chrome discovery job, disabled by default
+- [x] Treat repeated official posts from one publisher as one independence group
+- [ ] Product Hunt adapter only after API/commercial-use terms are explicitly approved
+- [ ] YC adapter only when a stable permitted source/API is selected
+- [ ] Add web.dev official source after confirming a stable feed/API contract
+
 ## Experimental/reference integrations
 
 These are not Stage 01 dependencies and must not become a second system of record.
@@ -217,7 +227,8 @@ These are not Stage 01 dependencies and must not become a second system of recor
 
 ## Later
 
-- [ ] Additional source providers beyond GitHub
+- [x] First additional source provider beyond GitHub: Chrome Developers official RSS
+- [ ] Additional source providers beyond Chrome/GitHub
 - [ ] Richer web discovery/catalog
 - [ ] Instagram carousel/Reels pipeline from approved content
 - [ ] OUTSCAN native security-context integration after readiness gates
