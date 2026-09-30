@@ -30,4 +30,8 @@ VibeRadar uses a small canonical taxonomy for emerging technology signals. The t
 
 ## Initial use
 
-The taxonomy should be used by Product Mechanic Radar, research summaries and future filters/watchlists. It should not be used to boost ranking merely because a topic is currently fashionable.
+The taxonomy is used by Product Mechanic Radar and the public `/mechanics?track=...` filter.
+
+Operator watch alerts use the same canonical tracks. The first enabled run creates a baseline of already-public mechanics without sending historical notifications. Later runs notify only when a watched public mechanic is new to the baseline, changes lifecycle stage, or crosses the configured material velocity/confidence threshold. Delivery is bounded per run and goes only to the configured private editor chat.
+
+Watch configuration does not change VIBE SCORE, confidence, lifecycle, editorial review or publication priority. Unknown configured tracks fail closed instead of silently broadening the watch scope.
