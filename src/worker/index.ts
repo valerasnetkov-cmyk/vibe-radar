@@ -5,6 +5,7 @@ import { logOperationalEvent } from "@/server/modules/operations/log";
 import { createDurableSchedulerStore } from "@/server/modules/operations/durable-store";
 import { JobScheduler, type ScheduledJob } from "@/server/modules/operations/scheduler";
 import { runConfiguredGitHubDiscovery } from "@/worker/jobs/github-discovery";
+import { runConfiguredChromeDiscovery } from "@/worker/jobs/chrome-discovery";
 import { runConfiguredScoreCalculation } from "@/server/modules/scoring/job";
 import { runConfiguredCandidateSelection } from "@/server/modules/editorial/candidate-job";
 import { runConfiguredPublication } from "@/server/modules/publishing/job";
@@ -31,6 +32,14 @@ async function run(): Promise<void> {
       leaseMs: config.WORKER_JOB_LEASE_MS,
       maxAttempts: config.WORKER_MAX_JOB_ATTEMPTS,
     });
+  if (config.CHROME_DISCOVERY_ENABLED) {
+    jobs.set("chrome-discovery", {
+      handler: runConfiguredChromeDiscovery,
+      intervalMs: config.CHROME_DISCOVERY_INTERVAL_MS,
+      leaseMs: config.WORKER_JOB_LEASE_MS,
+      maxAttempts: config.WORKER_MAX_JOB_ATTEMPTS,
+    });
+  }
   jobs.set("score-calculation", {
     handler: runConfiguredScoreCalculation,
     intervalMs: config.SCORE_CALCULATION_INTERVAL_MS,
