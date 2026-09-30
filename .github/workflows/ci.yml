@@ -44,12 +44,23 @@ jobs:
       - run: pnpm test
       - name: integration tests (must not skip)
         run: |
-          output=$(pnpm test:integration 2>&1)
-          echo "$output"
-          echo "$output" | grep -Eq "[1-9][0-9]* skipped" && {
+          set +e
+          output="$(pnpm test:integration 2>&1)"
+          test_code=$?
+          set -e
+
+          printf '%s\n' "$output"
+
+          if [ "$test_code" -ne 0 ]; then
+            exit "$test_code"
+          fi
+
+          if printf '%s\n' "$output" | grep -Eq '[1-9][0-9]* skipped'; then
             echo "DB integration tests skipped unexpectedly"
             exit 1
-          }
+          fi
+
+          echo "Integration tests passed with zero reported skips"
       - run: pnpm check:lines
       - run: pnpm build
       - run: pnpm build:worker

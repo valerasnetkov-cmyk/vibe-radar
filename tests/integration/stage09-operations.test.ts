@@ -54,7 +54,10 @@ maybe("Stage 09 durable operations", () => {
     if (!hasDatabase) return;
     const database = getDatabase();
     try {
-      for (const id of runIds) {
+      // Reverse insertion order: replay (child) runs reference their parent
+      // through replay_of_job_run_id, so children must go first. Scoped to
+      // rows created by these tests; catches stay as best-effort guards.
+      for (const id of [...runIds].reverse()) {
         await database
           .delete(jobRuns)
           .where(eq(jobRuns.id, id))

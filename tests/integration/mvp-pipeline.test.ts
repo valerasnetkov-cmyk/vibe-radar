@@ -82,6 +82,15 @@ maybe("MVP database-backed pipeline", () => {
           .where(eq(candidates.id, id))
           .catch(() => undefined);
       }
+      // Dependents first: snapshots reference source events, so they go
+      // before events; remaining catches stay as best-effort guards for
+      // cross-file races on the shared gate database.
+      for (const id of projectIds) {
+        await database
+          .delete(projectSnapshots)
+          .where(eq(projectSnapshots.projectId, id))
+          .catch(() => undefined);
+      }
       for (const id of eventIds) {
         await database
           .delete(sourceEvents)
@@ -89,10 +98,6 @@ maybe("MVP database-backed pipeline", () => {
           .catch(() => undefined);
       }
       for (const id of projectIds) {
-        await database
-          .delete(projectSnapshots)
-          .where(eq(projectSnapshots.projectId, id))
-          .catch(() => undefined);
         await database
           .delete(providerIdentities)
           .where(eq(providerIdentities.projectId, id))
