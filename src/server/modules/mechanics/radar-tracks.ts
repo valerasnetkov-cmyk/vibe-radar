@@ -64,3 +64,17 @@ export function normalizeRadarTracks(values: string[]): RadarTrack[] {
     ),
   ];
 }
+
+export function parseRadarWatchTracks(value: string): RadarTrack[] {
+  const raw = value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const normalized: RadarTrack[] = [];
+  for (const item of raw) {
+    const track = normalizeRadarTrack(item);
+    if (!track) throw new Error("Unknown radar watch track");
+    if (!normalized.includes(track)) normalized.push(track);
+  }
+  return normalized;
+}
