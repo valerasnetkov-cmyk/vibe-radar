@@ -11,11 +11,11 @@ CREATE TABLE "track_watch_states" (
   "last_velocity" integer NOT NULL,
   "last_confidence" integer NOT NULL,
   "provider_message_id" text,
-  "sent_at" timestamptz NOT NULL DEFAULT now()
+  "checkpoint_at" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE UNIQUE INDEX "uq_track_watch_state_profile_mechanic"
 ON "track_watch_states" ("profile_key", "mechanic_id");
 
-CREATE INDEX "track_watch_state_sent_idx"
-ON "track_watch_states" ("sent_at");
+CREATE INDEX "track_watch_state_checkpoint_idx"
+ON "track_watch_states" ("checkpoint_at");
