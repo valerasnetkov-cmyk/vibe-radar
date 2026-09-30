@@ -11,6 +11,7 @@ All notable durable changes to VibeRadar are documented here.
 - Product documentation keeping radar-track classification independent from VIBE SCORE, editorial approval, and publication priority.
 - PostgreSQL `radar_tracks` persistence with a database allow-list, normalized merge behavior, and backward-compatible empty defaults.
 - Public mechanic read-model projection and `/mechanics?track=...` filtering.
+- Durable operator track-watch profile with first-run baseline, thresholded change detection, bounded Telegram delivery, and scheduler integration.
 
 ## Unreleased — Stage 11 evidence-linked opportunity engine
 
