@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { getDatabase } from "@/server/db/client";
-import { trackWatchStates } from "@/server/db/schema";
+import { trackWatchProfiles, trackWatchStates } from "@/server/db/schema";
 import {
   listPublicMechanics,
   type PublicMechanic,
@@ -83,6 +83,32 @@ export function renderTrackWatchAlert(
   return boundTelegramMessage(message);
 }
 
+async function baselineWatchProfile(
+  database: ReturnType<typeof getDatabase>,
+  profileKey: string,
+  mechanics: PublicMechanic[],
+): Promise<void> {
+  await database.transaction(async (transaction) => {
+    for (const mechanic of mechanics) {
+      await transaction
+        .insert(trackWatchStates)
+        .values({
+          profileKey,
+          mechanicId: mechanic.id,
+          lastStage: mechanic.stage,
+          lastVelocity: mechanic.velocity,
+          lastConfidence: mechanic.confidence,
+          sentAt: new Date(),
+        })
+        .onConflictDoNothing();
+    }
+    await transaction
+      .insert(trackWatchProfiles)
+      .values({ profileKey, initializedAt: new Date() })
+      .onConflictDoNothing();
+  });
+}
+
 export async function runTrackWatchAlerts(
   database: ReturnType<typeof getDatabase>,
   input: {
@@ -97,6 +123,16 @@ export async function runTrackWatchAlerts(
   const matched = (await listPublicMechanics(database)).filter((mechanic) =>
     mechanicMatchesWatch(mechanic, input.watchedTracks),
   );
+
+  const [profile] = await database
+    .select({ profileKey: trackWatchProfiles.profileKey })
+    .from(trackWatchProfiles)
+    .where(eq(trackWatchProfiles.profileKey, input.profileKey))
+    .limit(1);
+  if (!profile) {
+    await baselineWatchProfile(database, input.profileKey, matched);
+    return { sent: 0, matched: matched.length };
+  }
 
   let sent = 0;
   for (const mechanic of matched) {
