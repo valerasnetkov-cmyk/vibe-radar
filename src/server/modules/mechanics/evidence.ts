@@ -13,6 +13,7 @@ export type ResolvedMechanicEvidence = {
   observedAt: Date;
   /** Server-derived group, or UNRESOLVED when independence is unprovable. */
   group: string;
+  basis: "project" | "publisher" | "unresolved";
   resolved: boolean;
 };
 
@@ -31,9 +32,17 @@ export type EvidenceResolution = {
  * repositories are documented as not proven independent (see docs), while
  * same-project observations are conservatively merged.
  */
-export function deriveIndependenceGroup(projectId: string | null): string {
-  if (projectId) return `project:${projectId}`;
-  return UNRESOLVED_GROUP;
+const TRUSTED_PUBLISHER_PROVIDERS = new Set(["chrome"]);
+
+export function deriveIndependenceGroup(
+  projectId: string | null,
+  provider: string | null,
+): { group: string; basis: "project" | "publisher" | "unresolved" } {
+  if (projectId) return { group: `project:${projectId}`, basis: "project" };
+  if (provider && TRUSTED_PUBLISHER_PROVIDERS.has(provider)) {
+    return { group: `publisher:${provider}`, basis: "publisher" };
+  }
+  return { group: UNRESOLVED_GROUP, basis: "unresolved" };
 }
 
 /**
@@ -53,6 +62,7 @@ export async function resolveMechanicEvidence(
     let projectId: string | null = null;
     let sourceEventId: string | null = null;
     let observedAt: Date | null = null;
+    let provider: string | null = null;
 
     if (item.projectId) {
       const [project] = await database
@@ -74,7 +84,7 @@ export async function resolveMechanicEvidence(
 
     if (item.sourceEventId) {
       const [event] = await database
-        .select({ id: sourceEvents.id, retrievedAt: sourceEvents.retrievedAt })
+        .select({ id: sourceEvents.id, retrievedAt: sourceEvents.retrievedAt, provider: sourceEvents.provider })
         .from(sourceEvents)
         .where(eq(sourceEvents.id, item.sourceEventId))
         .limit(1);
@@ -83,6 +93,7 @@ export async function resolveMechanicEvidence(
         continue;
       }
       sourceEventId = event.id;
+      provider = event.provider;
       // Source retrieval time outranks project rollups for observation timing.
       observedAt = event.retrievedAt ?? observedAt;
     }
@@ -93,15 +104,16 @@ export async function resolveMechanicEvidence(
       continue;
     }
 
-    const group = deriveIndependenceGroup(projectId);
+    const independence = deriveIndependenceGroup(projectId, provider);
     resolved.push({
       projectId,
       sourceEventId,
       signalId: item.signalId ?? null,
       strength: typeof item.strength === "number" ? Math.min(100, Math.max(0, item.strength)) : 50,
       observedAt: observedAt ?? new Date(),
-      group,
-      resolved: group !== UNRESOLVED_GROUP,
+      group: independence.group,
+      basis: independence.basis,
+      resolved: independence.group !== UNRESOLVED_GROUP,
     });
   }
   return { resolved, skipped };
