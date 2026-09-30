@@ -1,6 +1,11 @@
 import { index, integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { productMechanics } from "@/server/db/schema/mechanics";
 
+export const trackWatchProfiles = pgTable("track_watch_profiles", {
+  profileKey: text("profile_key").primaryKey(),
+  initializedAt: timestamp("initialized_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const trackWatchStates = pgTable(
   "track_watch_states",
   {
