@@ -12,6 +12,7 @@ import {
   runConfiguredDailyRadar,
   runConfiguredWeeklyRadar,
 } from "@/server/modules/publishing/digest-job";
+import { runConfiguredTrackWatchAlerts } from "@/server/modules/mechanics/watch-job";
 
 const SHUTDOWN_GRACE_MS = 15000;
 
@@ -62,6 +63,14 @@ async function run(): Promise<void> {
     leaseMs: config.WORKER_JOB_LEASE_MS,
     maxAttempts: config.WORKER_MAX_JOB_ATTEMPTS,
   });
+  if (config.RADAR_WATCH_TRACKS.trim()) {
+    jobs.set("track-watch-alerts", {
+      handler: runConfiguredTrackWatchAlerts,
+      intervalMs: config.RADAR_WATCH_INTERVAL_MS,
+      leaseMs: config.WORKER_JOB_LEASE_MS,
+      maxAttempts: config.WORKER_MAX_JOB_ATTEMPTS,
+    });
+  }
   scheduler = new JobScheduler(
     jobs,
     {
