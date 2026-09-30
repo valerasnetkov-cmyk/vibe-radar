@@ -2,6 +2,21 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — External source discovery
+
+### Added
+
+- Fixed-host Chrome Developers RSS ingestion with timeout, size, content-type and URL-host validation.
+- `chrome` source provider and versioned database migration.
+- Optional durable `chrome-discovery` worker job, disabled by default.
+- Conservative publisher-level independence grouping so multiple official Chrome posts count as one source origin rather than multiple independent confirmations.
+
+### Security
+
+- External feed content remains untrusted and is reduced to bounded plain metadata before persistence.
+- The adapter cannot follow redirects or fetch arbitrary user-supplied URLs.
+- Unknown/non-approved source providers do not gain independent-evidence status automatically.
+
 ## Unreleased — Agent-native radar taxonomy
 
 ### Added

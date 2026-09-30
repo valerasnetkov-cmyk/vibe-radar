@@ -113,7 +113,7 @@ export async function appendMechanicEvidence(
         projectId: item.projectId,
         sourceEventId: item.sourceEventId,
         independenceGroup: item.group,
-        independenceBasis: item.resolved ? "project" : "unresolved",
+        independenceBasis: item.basis,
         evidenceKey: evidenceKeyFor({
           mechanicId,
           projectId: item.projectId,

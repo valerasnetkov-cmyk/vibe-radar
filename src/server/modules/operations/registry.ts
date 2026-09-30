@@ -7,6 +7,7 @@
  */
 export const KNOWN_JOB_NAMES = [
   "github-discovery",
+  "chrome-discovery",
   "score-calculation",
   "candidate-selection",
   "publication",
