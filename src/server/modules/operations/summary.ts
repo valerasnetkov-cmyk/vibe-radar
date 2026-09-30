@@ -86,11 +86,19 @@ export async function getOperationalSummary(
     else if (row.status === "DEAD_LETTER") summary.deadLetter = count;
     else summary.running = count;
   }
+  // Raw SQL aggregates return timestamps as strings through node-postgres;
+  // Drizzle-mapped columns return Dates. Normalize both without leaking.
+  const toIso = (value: Date | string | null): string | null => {
+    if (!value) return null;
+    return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+  };
   for (const row of lastSuccess) {
-    if (row.at) ensure(row.jobName).lastSuccessAt = row.at.toISOString();
+    const at = toIso(row.at);
+    if (at) ensure(row.jobName).lastSuccessAt = at;
   }
   for (const row of lastFailure) {
-    if (row.at) ensure(row.jobName).lastFailureAt = row.at.toISOString();
+    const at = toIso(row.at);
+    if (at) ensure(row.jobName).lastFailureAt = at;
   }
 
   const { used } = await readAiDailyUsage(database, day);

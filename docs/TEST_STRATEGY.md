@@ -192,6 +192,16 @@ For web changes verify at minimum:
 
 Visual QA must enforce `docs/WEB_UI.md`.
 
+## 7a. Release-gate integration discipline
+
+Database integration suites run against live PostgreSQL with fixture
+cleanup scoped to created rows; tests that depend on shared operational
+history scope assertions to their own rows. Race assertions accept every
+safe loser outcome (`busy` vs `already_published`/`already_sent`) while
+always requiring exactly one provider send. Raw SQL aggregates may return
+strings through node-postgres and must be normalized, never trusted as
+Dates. CI fails when any DB test skips unexpectedly.
+
 ## 8. Stage verification command contract
 
 Stage 01 should establish scripts equivalent to:

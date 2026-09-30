@@ -73,7 +73,18 @@ Keep the first deployment on one VPS if capacity is sufficient.
 
 ## 5. Deployment contract
 
-A production deploy should be explicit:
+Canonical MVP topology is a single VPS: Nginx/TLS (owns HSTS) in front of
+the Next.js web service (`pnpm start`) and the worker service
+(`pnpm start:worker`, no listener), with PostgreSQL private/local only.
+systemd units or Compose services supervise each process.
+
+A production deploy should be explicit about install, build (`pnpm build`
+plus `pnpm build:worker` for the esbuild worker bundle in
+`dist/worker/index.js`), migration (`pnpm db:migrate` as a separate step
+before starting new code; app processes never auto-migrate), start, stop,
+restart, health checks (`/api/health/live` for process,
+`/api/health/ready` for release level), and rollback (previous Git SHA and
+artifacts; forward-only schema, additive so the previous release boots):
 
 1. build immutable application artifacts/container images;
 2. run migrations as a controlled step;
@@ -186,6 +197,14 @@ Before public launch:
 - at least one tested restore.
 
 A backup that has never been restored is not considered verified.
+
+Release-gate drill (local, rehearsed): `pg_dump -Fc` of the gate database
+to storage outside the repository, restored with `pg_restore` into a
+separate empty database, then integrity-checked (`schema_migrations`,
+row counts for `projects`, `candidates`, `publications`, `job_runs`,
+`product_mechanics`, `opportunities`, unique constraints) with identical
+results on source and restore. The drill database is dropped afterwards;
+the source database is never overwritten. See `docs/RELEASE_GATE.md`.
 
 ## 11. Rollback
 

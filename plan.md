@@ -2,7 +2,7 @@
 
 ## Current status
 
-Runtime implementation is in progress through the staged delivery plan below. Stages 07 (Telegram editorial dispatch), 08 (approved publishing and public read model), 09 (durable worker operations), and 10 (evidence-backed Product Mechanic Radar) are closed; Stage 11 delivers the evidence-linked Opportunity Engine.
+Stages 07-11 are implementation-complete. The MVP release gate is closing the accumulated PostgreSQL integration risk: live migration chain, full integration matrix with zero skips, production web/worker runtime proof, backup/restore drill, and pre-production hardening. See docs/RELEASE_GATE.md. No production deploy happens in this gate.
 
 ## Stage 00 — Product/architecture bootstrap
 

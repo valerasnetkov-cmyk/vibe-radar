@@ -11,20 +11,24 @@ import { submitOpportunityBatch } from "../src/server/modules/opportunities/repo
  *
  * Usage: pnpm opportunities:propose -- <batch-json-file>
  */
-const file = process.argv[2];
-if (!file) {
-  console.error("Usage: pnpm opportunities:propose -- <batch-json-file>");
-  process.exit(1);
+async function main(): Promise<void> {
+  const file = process.argv[2];
+  if (!file) {
+    console.error("Usage: pnpm opportunities:propose -- <batch-json-file>");
+    process.exit(1);
+  }
+
+  try {
+    loadEnvironment();
+    const raw = await readFile(file, "utf8");
+    const database = getDatabase();
+    const results = await submitOpportunityBatch(database, JSON.parse(raw) as unknown);
+    console.log(JSON.stringify(results));
+    await closeDatabase();
+  } catch (error) {
+    console.error(`Batch rejected: ${error instanceof Error ? error.name : "INVALID_BATCH"}`);
+    process.exit(1);
+  }
 }
 
-try {
-  loadEnvironment();
-  const raw = await readFile(file, "utf8");
-  const database = getDatabase();
-  const results = await submitOpportunityBatch(database, JSON.parse(raw) as unknown);
-  console.log(JSON.stringify(results));
-  await closeDatabase();
-} catch (error) {
-  console.error(`Batch rejected: ${error instanceof Error ? error.name : "INVALID_BATCH"}`);
-  process.exit(1);
-}
+void main();

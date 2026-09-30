@@ -18,7 +18,10 @@ import {
 } from "@/server/modules/publishing/service";
 import { getPublishedProject, getPublishedRadar } from "@/server/modules/publishing/read-model";
 
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+import { getSafeIntegrationDatabaseUrl } from "./guard";
+
+const integrationUrl = getSafeIntegrationDatabaseUrl();
+const hasDatabase = integrationUrl !== null;
 const maybe = hasDatabase ? describe : describe.skip;
 
 const CHANNEL = "@test-public-channel";
@@ -267,7 +270,10 @@ maybe("Stage 08 approved publishing lifecycle", () => {
     const [first, second] = await Promise.all([call(), call()]);
     const outcomes = [first.outcome, second.outcome].sort();
     expect(send).toHaveBeenCalledTimes(1);
-    expect(outcomes).toEqual(["busy", "published"]);
+    // The loser either observed the in-flight pending row (busy) or the
+    // already-finalized row (already_published); both block a second send.
+    expect(outcomes[1]).toBe("published");
+    expect(["already_published", "busy"]).toContain(outcomes[0]);
   });
 
   it("never resends already-published rows", async () => {
@@ -309,7 +315,11 @@ maybe("Stage 08 approved publishing lifecycle", () => {
       });
     const [first, second] = await Promise.all([call(), call()]);
     expect(send).toHaveBeenCalledTimes(1);
-    expect([first.outcome, second.outcome].sort()).toEqual(["busy", "published"]);
+    // The re-claim loser either lost the atomic UPDATE (busy) or observed
+    // the already-finalized row; both block a second send.
+    const retryOutcomes = [first.outcome, second.outcome].sort();
+    expect(retryOutcomes[1]).toBe("published");
+    expect(["already_published", "busy"]).toContain(retryOutcomes[0]);
   });
 
   it("blocks automatic resend for reconciliation-required rows", async () => {

@@ -2,6 +2,24 @@
 
 All notable durable changes to VibeRadar are documented here.
 
+## Unreleased — MVP release gate 01
+
+### Fixed
+
+- CLI scripts (`db:migrate`, `ops:replay`, mechanics/opportunity CLIs) failed under tsx/CJS top-level-await handling; all entry points now run through `main()`.
+- Candidate selection resolved Telegram settings eagerly and dead-lettered without dispatchable work; settings now resolve only at dispatch time, and incomplete configuration classifies `CONFIG_INVALID` (fail fast).
+- Operational summary crashed on raw SQL timestamps returned as strings; timestamps normalize safely.
+- drizzle-orm raised to ^0.45.2 (SQL-identifier advisory); postcss advisories via Next.js are build-time-only with no attacker CSS path.
+
+### Added
+
+- Production worker build (`pnpm build:worker`, pinned esbuild bundle to `dist/worker/index.js`).
+- Readiness now requires the full shipped migration chain (`/api/health/ready`), with liveness independent.
+- Production security baseline headers (CSP deferred, HSTS owned by Nginx).
+- CI workflow with PostgreSQL 17 service, zero-skip integration enforcement, and a Linux worker graceful-stop smoke.
+- Integration safety guard refusing production/non-local database targets.
+- `docs/RELEASE_GATE.md` release runbook with deployment, backup/restore, and rollback procedures.
+
 ## Unreleased — Stage 11 evidence-linked opportunity engine
 
 ### Added

@@ -13,7 +13,10 @@ import { selectCandidate } from "@/server/modules/editorial/candidate-policy";
 import { getOrCreateCandidate } from "@/server/modules/editorial/candidate-repository";
 import { dispatchCandidateForReviewService } from "@/server/modules/editorial/dispatch-service";
 
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+import { getSafeIntegrationDatabaseUrl } from "./guard";
+
+const integrationUrl = getSafeIntegrationDatabaseUrl();
+const hasDatabase = integrationUrl !== null;
 const maybe = hasDatabase ? describe : describe.skip;
 
 function uniqueKey(prefix: string): string {
@@ -292,8 +295,10 @@ maybe("Stage 07 editorial dispatch lifecycle", () => {
     ]);
     const outcomes = [first.outcome, second.outcome].sort();
     expect(send).toHaveBeenCalledTimes(1);
-    expect(outcomes).toContain("sent");
-    expect(outcomes).toEqual(["busy", "sent"]);
+    // The loser either observed the in-flight PENDING claim (busy) or the
+    // already-finalized claim (already_sent); both block a second send.
+    expect(outcomes[1]).toBe("sent");
+    expect(["already_sent", "busy"]).toContain(outcomes[0]);
   });
 
   it("stores providerMessageId and REVIEW on success, and never resends SENT dispatches", async () => {
@@ -364,7 +369,10 @@ maybe("Stage 07 editorial dispatch lifecycle", () => {
     ]);
     const outcomes = [first.outcome, second.outcome].sort();
     expect(send).toHaveBeenCalledTimes(1);
-    expect(outcomes).toEqual(["busy", "sent"]);
+    // The re-claim loser either lost the atomic UPDATE (busy) or observed
+    // the already-finalized claim; both block a second send.
+    expect(outcomes[1]).toBe("sent");
+    expect(["already_sent", "busy"]).toContain(outcomes[0]);
   });
 
   it("returns the same row from concurrent getOrCreateCandidate calls", async () => {

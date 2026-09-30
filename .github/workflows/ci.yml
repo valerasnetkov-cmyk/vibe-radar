@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: viberadar
+          POSTGRES_USER: viberadar
+          POSTGRES_PASSWORD: viberadar_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U viberadar -d viberadar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://viberadar:viberadar_ci_only@localhost:5432/viberadar
+      DATABASE_SSL: disable
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm db:migrate
+      - run: pnpm lint
+      - run: pnpm format
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: integration tests (must not skip)
+        run: |
+          output=$(pnpm test:integration 2>&1)
+          echo "$output"
+          echo "$output" | grep -Eq "[1-9][0-9]* skipped" && {
+            echo "DB integration tests skipped unexpectedly"
+            exit 1
+          }
+      - run: pnpm check:lines
+      - run: pnpm build
+      - run: pnpm build:worker
+      - name: production worker smoke (SIGTERM graceful stop)
+        run: |
+          node dist/worker/index.js > worker-smoke.log 2>&1 &
+          worker_pid=$!
+          for _ in $(seq 1 30); do
+            count=$(PGPASSWORD=viberadar_ci_only psql -h localhost -U viberadar -d viberadar -tAc "select count(*) from job_runs;" 2>/dev/null || echo 0)
+            if [ "$count" -gt 0 ]; then break; fi
+            sleep 2
+          done
+          kill -TERM "$worker_pid"
+          wait "$worker_pid"
+          code=$?
+          cat worker-smoke.log
+          test "$code" -eq 0
+          grep -q '"status":"stopped"' worker-smoke.log

@@ -38,7 +38,11 @@ function classifyPreservedCode(code: string): boolean {
 }
 
 function classifyMessage(message: string): OperationalError | null {
-  if (/invalid server configuration|invalid.+config|missing.+config/i.test(message)) {
+  if (
+    /invalid server configuration|invalid.+config|missing.+config|configuration is incomplete|not configured/i.test(
+      message,
+    )
+  ) {
     return { code: "CONFIG_INVALID", retryable: false };
   }
   if (/budget.?exhausted/i.test(message)) {

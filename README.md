@@ -173,7 +173,7 @@ pnpm dev:worker
 
 Start PostgreSQL and apply the explicit foundation migration with `docker compose up -d postgres` and `pnpm db:migrate`.
 
-Verification commands are `pnpm lint`, `pnpm format`, `pnpm typecheck`, `pnpm test`, `pnpm test:integration`, `pnpm build`, and `pnpm check:lines`.
+Verification commands are `pnpm lint`, `pnpm format`, `pnpm typecheck`, `pnpm test`, `pnpm test:integration`, `pnpm check:lines`, `pnpm build`, and `pnpm build:worker`. Production processes start with `pnpm start` (web) and `pnpm start:worker` (esbuild bundle in `dist/worker/index.js`); migrations run explicitly via `pnpm db:migrate`. The MVP release gate is documented in `docs/RELEASE_GATE.md`.
 
 AI execution enforces bounded output size, retry attempts, and a UTC daily candidate budget before provider work.
 

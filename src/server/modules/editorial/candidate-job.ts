@@ -64,7 +64,6 @@ export function buildEditorCardProjection(input: {
 
 export async function runConfiguredCandidateSelection(): Promise<void> {
   const database = getDatabase();
-  const telegram = requireTelegramEditorConfig(loadEnvironment());
   const projectRows = await database
     .select({ id: projects.id, name: projects.name })
     .from(projects)
@@ -150,6 +149,9 @@ export async function runConfiguredCandidateSelection(): Promise<void> {
     });
     if (!projection.ok) continue;
 
+    // Telegram settings resolve only when a dispatch is actually imminent,
+    // so selection without dispatchable candidates never requires them.
+    const telegram = requireTelegramEditorConfig(loadEnvironment());
     const bot = createEditorBot({
       token: telegram.botToken,
       editorChatId: telegram.editorChatId,

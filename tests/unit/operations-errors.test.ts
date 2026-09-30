@@ -42,6 +42,9 @@ describe("operational error normalization", () => {
       code: "CONFIG_INVALID",
       retryable: false,
     });
+    expect(
+      normalizeOperationalError(new Error("Telegram editorial configuration is incomplete")),
+    ).toEqual({ code: "CONFIG_INVALID", retryable: false });
     expect(normalizeOperationalError(new Error("Candidate is not approved"))).toEqual({
       code: "JOB_STATE_CONFLICT",
       retryable: false,

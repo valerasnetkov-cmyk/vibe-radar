@@ -15,7 +15,10 @@ import { submitMechanicProposal } from "@/server/modules/mechanics/repository";
 import { reviewMechanic } from "@/server/modules/mechanics/review";
 import type { MechanicProposal } from "@/server/modules/mechanics/contract";
 
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+import { getSafeIntegrationDatabaseUrl } from "./guard";
+
+const integrationUrl = getSafeIntegrationDatabaseUrl();
+const hasDatabase = integrationUrl !== null;
 const maybe = hasDatabase ? describe : describe.skip;
 
 function uniqueKey(prefix: string): string {

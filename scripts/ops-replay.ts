@@ -34,38 +34,42 @@ const HANDLERS: Record<KnownJobName, () => Promise<void>> = {
   "weekly-radar": () => runConfiguredWeeklyRadar(),
 };
 
-const jobRunId = process.argv[2];
-if (!jobRunId) {
-  console.error("Usage: pnpm ops:replay -- <job-run-id>");
-  process.exit(1);
-}
-
-try {
-  loadEnvironment();
-  const database = getDatabase();
-  const old = await loadJobRun(jobRunId, database);
-  if (!old) {
-    console.error("Job run not found");
+async function main(): Promise<void> {
+  const jobRunId = process.argv[2];
+  if (!jobRunId) {
+    console.error("Usage: pnpm ops:replay -- <job-run-id>");
     process.exit(1);
   }
-  const name = assertKnownJobName(old.jobName);
-  const [run] = await createJobRun(name, old.maxAttempts, { replayOfJobRunId: old.id }, database);
-  if (!run) throw new Error("Failed to persist replay job run");
-  const result = await runBoundedJob(HANDLERS[name], { maxAttempts: old.maxAttempts });
-  await finishJobRun(run.id, result, database);
-  logOperationalEvent({
-    level: result.status === "SUCCEEDED" ? "info" : "error",
-    service: "ops-replay",
-    jobName: name,
-    jobRunId: run.id,
-    status: result.status,
-    attempt: result.attempts,
-    errorCode: result.errorCode,
-  });
-  await closeDatabase();
-  if (result.status !== "SUCCEEDED") process.exitCode = 1;
-} catch (error) {
-  const normalized = normalizeOperationalError(error);
-  console.error(`Replay failed: ${normalized.code}`);
-  process.exit(1);
+
+  try {
+    loadEnvironment();
+    const database = getDatabase();
+    const old = await loadJobRun(jobRunId, database);
+    if (!old) {
+      console.error("Job run not found");
+      process.exit(1);
+    }
+    const name = assertKnownJobName(old.jobName);
+    const [run] = await createJobRun(name, old.maxAttempts, { replayOfJobRunId: old.id }, database);
+    if (!run) throw new Error("Failed to persist replay job run");
+    const result = await runBoundedJob(HANDLERS[name], { maxAttempts: old.maxAttempts });
+    await finishJobRun(run.id, result, database);
+    logOperationalEvent({
+      level: result.status === "SUCCEEDED" ? "info" : "error",
+      service: "ops-replay",
+      jobName: name,
+      jobRunId: run.id,
+      status: result.status,
+      attempt: result.attempts,
+      errorCode: result.errorCode,
+    });
+    await closeDatabase();
+    if (result.status !== "SUCCEEDED") process.exitCode = 1;
+  } catch (error) {
+    const normalized = normalizeOperationalError(error);
+    console.error(`Replay failed: ${normalized.code}`);
+    process.exit(1);
+  }
 }
+
+void main();

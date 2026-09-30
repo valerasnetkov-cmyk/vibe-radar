@@ -135,6 +135,14 @@ Redact/forbid:
 - Public projections carry no editor ids, notes, evidence keys, raw payloads, assessment ids, or unsafe URLs; hypothesis prose stays inert data.
 - Operator CLIs validate input and perform no fetching, importing, or shell execution from proposal content.
 
+## 8d. Release-gate posture
+
+- Integration fixtures run only against identifiably local databases; production mode and non-local hosts refuse explicitly.
+- Readiness exposes booleans only, never SQL, hosts, paths, or stacks.
+- Production headers ship `nosniff`, strict referrer/frame policy, and a minimal permissions policy; CSP stays deferred until a nonce architecture exists, and HSTS belongs to Nginx/TLS.
+- Dependency audit: drizzle-orm raised past the SQL-identifier advisory; remaining postcss advisories are build-time-only with no attacker-controlled CSS path.
+- Tracked-tree and history secret audit found no real credentials (only synthetic test fixtures and local-only compose values).
+
 ## 9. Abuse/cost controls
 
 MVP has no anonymous public write surface, but background/provider cost can still be abused by bad inputs or logic errors.

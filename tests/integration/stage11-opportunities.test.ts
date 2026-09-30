@@ -32,7 +32,10 @@ import { reviewMechanic } from "@/server/modules/mechanics/review";
 import { publishApprovedCandidate } from "@/server/modules/publishing/service";
 import type { BuildabilityLabel } from "@/server/modules/buildability/assess";
 
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+import { getSafeIntegrationDatabaseUrl } from "./guard";
+
+const integrationUrl = getSafeIntegrationDatabaseUrl();
+const hasDatabase = integrationUrl !== null;
 const maybe = hasDatabase ? describe : describe.skip;
 
 const CHANNEL = "@test-public-channel";

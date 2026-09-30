@@ -26,7 +26,10 @@ import {
   scores,
 } from "@/server/db/schema";
 
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+import { getSafeIntegrationDatabaseUrl } from "./guard";
+
+const integrationUrl = getSafeIntegrationDatabaseUrl();
+const hasDatabase = integrationUrl !== null;
 const maybe = hasDatabase ? describe : describe.skip;
 
 function uniqueKey(prefix: string): string {
@@ -136,6 +139,23 @@ maybe("Stage 09 durable operations", () => {
 
   it("persists RUNNING history through success and dead letter", async () => {
     const database = getDatabase();
+    // Scope assertions to rows created below: the shared gate database may
+    // hold honest history from earlier smoke runs.
+    const seen = new Set(
+      (
+        await database
+          .select({ id: jobRuns.id })
+          .from(jobRuns)
+          .where(eq(jobRuns.jobName, "candidate-selection"))
+      )
+        .concat(
+          await database
+            .select({ id: jobRuns.id })
+            .from(jobRuns)
+            .where(eq(jobRuns.jobName, "score-calculation")),
+        )
+        .map((row) => row.id),
+    );
     const store = createDurableSchedulerStore(database, "owner-history");
     const scheduler = new JobScheduler(
       new Map([
@@ -158,7 +178,7 @@ maybe("Stage 09 durable operations", () => {
       .select()
       .from(jobRuns)
       .where(eq(jobRuns.jobName, "score-calculation"));
-    const success = runs.find((row) => row.status === "SUCCEEDED");
+    const success = runs.find((row) => row.status === "SUCCEEDED" && !seen.has(row.id));
     expect(success?.attemptCount).toBe(1);
     expect(success?.finishedAt).toBeInstanceOf(Date);
     if (success) runIds.push(success.id);
@@ -166,7 +186,7 @@ maybe("Stage 09 durable operations", () => {
       .select()
       .from(jobRuns)
       .where(eq(jobRuns.jobName, "candidate-selection"));
-    const deadRow = dead.find((row) => row.status === "DEAD_LETTER");
+    const deadRow = dead.find((row) => row.status === "DEAD_LETTER" && !seen.has(row.id));
     expect(deadRow?.errorCode).toBe("JOB_TRANSIENT");
     if (deadRow) runIds.push(deadRow.id);
     expect(success).toBeDefined();
@@ -261,7 +281,9 @@ maybe("Stage 09 durable operations", () => {
     const database = getDatabase();
     const candidateId = "00000000-0000-4000-8000-000000000090";
     candidateIds.push(candidateId);
-    const publishedAt = new Date("2026-09-18T10:00:00Z");
+    // A dedicated period keeps this test isolated from the idempotency
+    // test above, which owns DAILY/2026-09-18.
+    const publishedAt = new Date("2026-09-19T10:00:00Z");
     await database.insert(publications).values({
       candidateId,
       editorialDecisionId: "00000000-0000-4000-8000-000000000091",
@@ -292,9 +314,9 @@ maybe("Stage 09 durable operations", () => {
       attemptCount: 1,
       publishedAt,
     });
-    await runConfiguredDailyRadar(new Date("2026-09-18T12:00:00Z"), database);
+    await runConfiguredDailyRadar(new Date("2026-09-19T12:00:00Z"), database);
     const digests = await database.select().from(radarDigests);
-    const daily = digests.find((row) => row.window === "DAILY" && row.periodKey === "2026-09-18");
+    const daily = digests.find((row) => row.window === "DAILY" && row.periodKey === "2026-09-19");
     if (daily) digestIds.push(daily.id);
     expect(daily?.itemCount).toBe(1);
     const payload = daily?.contentPayload as
