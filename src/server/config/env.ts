@@ -15,6 +15,9 @@ const environmentSchema = z.object({
   GITHUB_DISCOVERY_QUERIES: z.string().default(""),
   GITHUB_DISCOVERY_INTERVAL_MS: z.coerce.number().int().min(60000).max(86400000).default(3600000),
   GITHUB_DISCOVERY_MAX_QUERIES: z.coerce.number().int().min(1).max(50).default(10),
+  CHROME_DISCOVERY_ENABLED: booleanFlag.default(false),
+  CHROME_DISCOVERY_INTERVAL_MS: z.coerce.number().int().min(60000).max(86400000).default(3600000),
+  CHROME_FEED_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30000).default(10000),
   SCORE_CALCULATION_INTERVAL_MS: z.coerce.number().int().min(60000).max(86400000).default(3600000),
   CANDIDATE_SELECTION_INTERVAL_MS: z.coerce
     .number()
