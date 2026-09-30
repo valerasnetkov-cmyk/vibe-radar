@@ -199,7 +199,10 @@ Runtime implementation is in progress through the staged delivery plan below. St
 - [x] Keep track classification separate from VIBE SCORE and editorial priority
 - [x] Persist canonical tracks on Product Mechanic Radar records with DB allow-list enforcement
 - [x] Add public `/mechanics?track=...` filtering after persisted taxonomy usage
-- [ ] Add user watchlists/alerts by canonical track
+- [x] Add operator watch profile with Telegram alerts by canonical track
+- [x] Baseline existing public mechanics on first run to avoid historical alert floods
+- [x] Alert only on new mechanics, stage changes, or material velocity/confidence changes
+- [ ] Add authenticated user-managed watchlists after the product has a user/account surface
 
 ## Experimental/reference integrations
 
