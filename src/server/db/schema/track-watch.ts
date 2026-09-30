@@ -18,10 +18,10 @@ export const trackWatchStates = pgTable(
     lastVelocity: integer("last_velocity").notNull(),
     lastConfidence: integer("last_confidence").notNull(),
     providerMessageId: text("provider_message_id"),
-    sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
+    checkpointAt: timestamp("checkpoint_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     unique("uq_track_watch_state_profile_mechanic").on(table.profileKey, table.mechanicId),
-    index("track_watch_state_sent_idx").on(table.sentAt),
+    index("track_watch_state_checkpoint_idx").on(table.checkpointAt),
   ],
 );
