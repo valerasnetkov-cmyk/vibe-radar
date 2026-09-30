@@ -15,10 +15,22 @@ describe("runtime configuration", () => {
     expect(config.OUTSCAN_CHECK_ENABLED).toBe(false);
     expect(config.RADAR_WATCH_TRACKS).toBe("");
     expect(config.RADAR_WATCH_INTERVAL_MS).toBe(3600000);
+    expect(config.CHROME_DISCOVERY_ENABLED).toBe(false);
+    expect(config.CHROME_DISCOVERY_INTERVAL_MS).toBe(3600000);
+    expect(config.CHROME_FEED_TIMEOUT_MS).toBe(10000);
   });
 
   it("rejects invalid flags safely", () => {
     expect(() => parseEnvironment({ ...valid, OUTSCAN_CHECK_ENABLED: "yes" })).toThrow(
+      "Invalid server configuration",
+    );
+  });
+
+  it("rejects unsafe Chrome discovery configuration", () => {
+    expect(() => parseEnvironment({ ...valid, CHROME_DISCOVERY_ENABLED: "yes" })).toThrow(
+      "Invalid server configuration",
+    );
+    expect(() => parseEnvironment({ ...valid, CHROME_FEED_TIMEOUT_MS: "100" })).toThrow(
       "Invalid server configuration",
     );
   });
