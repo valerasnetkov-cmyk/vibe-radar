@@ -98,7 +98,7 @@ async function baselineWatchProfile(
           lastStage: mechanic.stage,
           lastVelocity: mechanic.velocity,
           lastConfidence: mechanic.confidence,
-          sentAt: new Date(),
+          checkpointAt: new Date(),
         })
         .onConflictDoNothing();
     }
@@ -182,7 +182,7 @@ export async function runTrackWatchAlerts(
         lastVelocity: mechanic.velocity,
         lastConfidence: mechanic.confidence,
         providerMessageId: delivery.providerMessageId,
-        sentAt: new Date(),
+        checkpointAt: new Date(),
       })
       .onConflictDoUpdate({
         target: [trackWatchStates.profileKey, trackWatchStates.mechanicId],
@@ -191,7 +191,7 @@ export async function runTrackWatchAlerts(
           lastVelocity: mechanic.velocity,
           lastConfidence: mechanic.confidence,
           providerMessageId: delivery.providerMessageId,
-          sentAt: new Date(),
+          checkpointAt: new Date(),
         },
       });
     sent += 1;
