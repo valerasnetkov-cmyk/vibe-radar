@@ -1,0 +1,25 @@
+[Unit]
+Description=VibeRadar Next.js web service
+Wants=network-online.target
+After=network-online.target postgresql.service
+
+[Service]
+Type=simple
+User=viberadar
+Group=viberadar
+WorkingDirectory=/opt/viberadar/app
+EnvironmentFile=/opt/viberadar/shared/.env.production
+Environment=HOSTNAME=127.0.0.1
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env pnpm start -- --hostname 127.0.0.1 --port 3000
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+[Unit]
+Description=VibeRadar background worker
+Wants=network-online.target
+After=network-online.target postgresql.service
+
+[Service]
+Type=simple
+User=viberadar
+Group=viberadar
+WorkingDirectory=/opt/viberadar/app
+EnvironmentFile=/opt/viberadar/shared/.env.production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env pnpm start:worker
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -76,7 +76,8 @@ Keep the first deployment on one VPS if capacity is sufficient.
 Canonical MVP topology is a single VPS: Nginx/TLS (owns HSTS) in front of
 the Next.js web service (`pnpm start`) and the worker service
 (`pnpm start:worker`, no listener), with PostgreSQL private/local only.
-systemd units or Compose services supervise each process.
+systemd units supervise each process in the canonical VPS deployment. Docker
+Compose remains local-development infrastructure only.
 
 A production deploy should be explicit about install, build (`pnpm build`
 plus `pnpm build:worker` for the esbuild worker bundle in
@@ -94,6 +95,9 @@ artifacts; forward-only schema, additive so the previous release boots):
 6. retain previous known-good release for rollback.
 
 Do not run schema mutation implicitly from every web process startup.
+
+The concrete first-deployment procedure and committed systemd/Nginx templates
+are in `docs/PRODUCTION_DEPLOYMENT.md`.
 
 ## 6. TLS and reverse proxy
 

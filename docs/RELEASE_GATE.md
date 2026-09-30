@@ -78,7 +78,7 @@
 - Readiness: database reachable plus full migration chain applied.
   Responses carry booleans only, never SQL, hosts, paths, or stacks.
 
-## 8. Deployment model (canonical, not yet deployed)
+## 8. Deployment model
 
 Single VPS:
 
@@ -99,6 +99,9 @@ Migration (`pnpm db:migrate`) is an explicit deploy step run before
 starting new code; app processes never auto-migrate on startup.
 Health checks hit `/api/health/live` (process) and `/api/health/ready`
 (release level).
+
+The production deployment runbook and templates are
+`docs/PRODUCTION_DEPLOYMENT.md` and `deploy/`.
 
 ## 9. Security header ownership
 

@@ -19,6 +19,13 @@ All notable durable changes to VibeRadar are documented here.
 - CI workflow with PostgreSQL 17 service, zero-skip integration enforcement, and a Linux worker graceful-stop smoke.
 - Integration safety guard refusing production/non-local database targets.
 - `docs/RELEASE_GATE.md` release runbook with deployment, backup/restore, and rollback procedures.
+- VPS deployment templates for the `viberadar` systemd web and worker
+  services, Nginx/TLS reverse proxy, and a secrets-free production environment
+  example.
+- A guarded production build/migration script that requires the expected clean
+  release SHA and never performs a destructive Git or database operation.
+- `docs/PRODUCTION_DEPLOYMENT.md` with first-boot, health, controlled
+  integration, backup, restart, and rollback procedures for `viberadar.ru`.
 
 ## Unreleased — Stage 11 evidence-linked opportunity engine
 
