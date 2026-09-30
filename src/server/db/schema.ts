@@ -44,7 +44,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const providerEnum = pgEnum("provider", ["github"]);
+export const providerEnum = pgEnum("provider", ["github", "chrome"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "archived"]);
 export const publicationStatusEnum = pgEnum("publication_status", [
   "pending",
